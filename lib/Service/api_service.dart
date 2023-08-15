@@ -1,15 +1,15 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
+
 import 'package:app5/model/Juz.dart';
 import 'package:app5/model/Surah.dart';
 import 'package:app5/model/Translation.dart';
 import 'package:app5/model/aya_of_the_day.dart';
-
 import 'package:app5/model/qari.dart';
 import 'package:app5/model/sajda.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
 
 class ApiServices {
   final endPointUrl = "http://api.alquran.cloud/v1/surah";
