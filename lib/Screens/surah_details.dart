@@ -3,6 +3,7 @@ import 'package:app5/Widget/Custom_Translation.dart';
 import 'package:app5/constants/constants.dart';
 import 'package:app5/model/Translation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:solid_bottom_sheet/solid_bottom_sheet.dart';
 import 'package:app5/Service/api_service.dart';
 
@@ -19,10 +20,11 @@ class SurahDetails extends StatefulWidget {
 class _SurahDetailsState extends State<SurahDetails> {
   ApiServices _apiServices = ApiServices();
   Translation? _translation = Translation.urdu;
+  final SolidController _controller = SolidController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey,
+      backgroundColor: backgroundColor,
       body: FutureBuilder(
         future: _apiServices.getTranslation(
             Constants.surahIndex!, _translation!.index),
@@ -33,13 +35,28 @@ class _SurahDetailsState extends State<SurahDetails> {
               child: CircularProgressIndicator(),
             );
           } else if (snapshot.hasData) {
-            return ListView.builder(
-              itemCount: snapshot.data!.translationList.length,
-              itemBuilder: (context, index) {
-                return TranslationTile(
-                    index: index,
-                    surahTranslation: snapshot.data!.translationList[index]);
-              },
+            return Scaffold(
+              backgroundColor: backgroundColor,
+              appBar: AppBar(
+                  surfaceTintColor: backgroundColor,
+                  backgroundColor: backgroundColor,
+                  title: Text(
+                    "Surah Details",
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      color: textprimary,
+                      letterSpacing: 1,
+                    ),
+                  )),
+              body: ListView.builder(
+                itemCount: snapshot.data!.translationList.length,
+                itemBuilder: (context, index) {
+                  return TranslationTile(
+                      index: index,
+                      surahTranslation: snapshot.data!.translationList[index]);
+                },
+              ),
             );
           } else
             return Center(
@@ -48,89 +65,53 @@ class _SurahDetailsState extends State<SurahDetails> {
         },
       ),
       bottomSheet: SolidBottomSheet(
+        controller: _controller,
         headerBar: Container(
-          color: background,
+          color: containercolor,
           height: 50,
           child: Center(
             child: Text(
               "Swipe me!",
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: textprimary),
             ),
           ),
         ),
         body: Container(
-          color: dark,
+          color: backgroundColor,
           height: 30,
           child: SingleChildScrollView(
             child: Center(
               child: Column(
                 children: [
-                  ListTile(
-                    title: Text(
-                      "urdu",
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                    leading: Radio<Translation>(
-                      value: Translation.urdu,
-                      groupValue: _translation,
-                      onChanged: (Translation? value) {
-                        setState(() {
-                          _translation = value;
-                        });
-                      },
-                    ),
-                  ),
-                  ListTile(
-                    title: Text(
-                      "english",
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                    leading: Radio<Translation>(
-                      value: Translation.english,
-                      groupValue: _translation,
-                      onChanged: (Translation? value) {
-                        setState(() {
-                          _translation = value;
-                        });
-                      },
-                    ),
-                  ),
-                  ListTile(
-                    title: Text(
-                      "chineese",
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                    leading: Radio<Translation>(
-                      focusColor: Colors.yellow,
-                      value: Translation.chineese,
-                      groupValue: _translation,
-                      onChanged: (Translation? value) {
-                        setState(() {
-                          _translation = value;
-                        });
-                      },
-                    ),
-                  ),
-                  ListTile(
-                    title: Text(
-                      "turkish",
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                    leading: Radio<Translation>(
-                      value: Translation.turkish,
-                      groupValue: _translation,
-                      onChanged: (Translation? value) {
-                        setState(() {
-                          _translation = value;
-                        });
-                      },
-                    ),
-                  ),
+                  buildTile("Urdu", Translation.urdu),
+                  buildTile("English", Translation.english),
+                  buildTile("Chineese", Translation.chineese),
+                  buildTile("Turkish", Translation.turkish),
                 ],
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget buildTile(String title, Translation value) {
+    return ListTile(
+      title: Text(
+        title,
+        style: TextStyle(color: textprimary, fontSize: 20),
+      ),
+      leading: Radio<Translation>(
+        value: value,
+        groupValue: _translation,
+        onChanged: (Translation? val) {
+          setState(() {
+            _translation = val;
+          });
+
+          _controller.hide(); // ✅ auto swipe down (close)
+        },
       ),
     );
   }

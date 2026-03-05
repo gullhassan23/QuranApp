@@ -1,3 +1,4 @@
+import 'package:app5/Global.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:flutter/material.dart';
@@ -26,29 +27,44 @@ class _HijriWState extends State<HijriW> {
           children: [
             Padding(
                 padding: const EdgeInsets.only(left: 3.0),
-                child: Text(_hijri.hDay.toString(),
-                    style: GoogleFonts.poppins(
-                        color: Colors.white, fontSize: 25))),
+                child: Text(
+                  _hijri.hDay.toString(),
+                  style: GoogleFonts.amiri(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: textprimary,
+                  ),
+                )),
             Padding(
                 padding: const EdgeInsets.only(left: 8.0),
-                child: Text(_hijri.longMonthName,
-                    style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 30))),
+                child: Text(
+                  _hijri.longMonthName,
+                  style: GoogleFonts.amiri(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: textprimary,
+                  ),
+                )),
             Padding(
                 padding: const EdgeInsets.only(left: 5.0),
                 child: Text(
                   '${_hijri.hYear} AH',
-                  style: TextStyle(fontSize: 25, color: Colors.white),
+                  style: GoogleFonts.amiri(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: textprimary,
+                  ),
                 )),
           ],
         ),
-        Text(formatted,
-            style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 22)),
+        Text(
+          formatted,
+          style: GoogleFonts.poppins(
+            fontSize: 15,
+            color: textprimary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ],
     );
   }

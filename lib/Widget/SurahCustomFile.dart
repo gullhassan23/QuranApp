@@ -1,3 +1,4 @@
+import 'package:app5/Global.dart';
 import 'package:app5/model/Surah.dart';
 import 'package:flutter/material.dart';
 
@@ -9,29 +10,44 @@ Widget SurahCustomListTile(
     onTap: ontap,
     child: Container(
       padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, boxShadow: [
-        BoxShadow(
-          color: Colors.black12,
-          blurRadius: 3.0,
-        )
-      ]),
+      decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFF6D7C3), // light peach
+              Color(0xFFF2C6AD), // darker peach
+            ],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 3.0,
+            )
+          ]),
       child: Column(
         children: [
           Row(
             children: [
               Container(
+                height: 36,
+                width: 36,
                 alignment: Alignment.center,
-                height: 30,
-                width: 40,
-                padding: EdgeInsets.all(8),
-                decoration:
-                    BoxDecoration(shape: BoxShape.circle, color: Colors.black),
-                child: Text(
-                  (surah.number).toString(),
-                  style: TextStyle(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: textprimary,
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    surah.number.toString(),
+                    maxLines: 1,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
-                      fontWeight: FontWeight.bold),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
               SizedBox(

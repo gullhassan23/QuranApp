@@ -4,6 +4,7 @@ import 'package:app5/Service/api_service.dart';
 import 'package:app5/Widget/qariCustomTile.dart';
 import 'package:app5/model/qari.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 // ignore: must_be_immutable
 class QariScreen extends StatelessWidget {
@@ -13,14 +14,23 @@ class QariScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: gray,
+        backgroundColor: backgroundColor,
         body: Padding(
           padding: const EdgeInsets.only(top: 20.0, left: 12, right: 12),
           child: Column(
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Center(child: Text("List of Qari",style: TextStyle(color: Colors.white,fontSize: 25,fontWeight: FontWeight.bold),)),
+                child: Center(
+                    child: Text(
+                  "List of Qari",
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                    color: textprimary,
+                    letterSpacing: 1,
+                  ),
+                )),
               ),
               SizedBox(
                 height: 12,
@@ -44,6 +54,7 @@ class QariScreen extends StatelessWidget {
                     );
                   }
                   return ListView.builder(
+                      // itemCount: snapshot.data!.length,
                       itemCount: snapshot.data!.length,
                       itemBuilder: (context, index) {
                         return QariCustomTile(

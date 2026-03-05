@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     
     return Scaffold(
-        backgroundColor: background,
+        backgroundColor: backgroundColor,
         body: SafeArea(
           child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30),

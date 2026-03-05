@@ -1,3 +1,4 @@
+import 'package:app5/Global.dart';
 import 'package:app5/model/qari.dart';
 import 'package:flutter/material.dart';
 
@@ -21,7 +22,7 @@ class _QariCustomTileState extends State<QariCustomTile> {
         child: Container(
           padding: const EdgeInsets.all(20.0),
           decoration: BoxDecoration(
-              color: Colors.white,
+              color: containercolor,
               shape: BoxShape.rectangle,
               borderRadius: BorderRadius.all(Radius.circular(8)),
               boxShadow: [
@@ -37,7 +38,10 @@ class _QariCustomTileState extends State<QariCustomTile> {
               Text(
                 widget.qari.name!,
                 textAlign: TextAlign.start,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: textprimary),
               )
             ],
           ),

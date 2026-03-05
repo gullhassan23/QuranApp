@@ -1,10 +1,11 @@
 import 'package:app5/Global.dart';
 import 'package:app5/Screens/AudioScreen.dart';
 import 'package:app5/Service/api_service.dart';
-import 'package:app5/constants/constants.dart';
+
 import 'package:app5/model/Surah.dart';
 import 'package:app5/model/qari.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AudioSurahScreen extends StatefulWidget {
   const AudioSurahScreen({
@@ -23,15 +24,20 @@ class _AudioSurahScreenState extends State<AudioSurahScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: gray,
+        backgroundColor: backgroundColor,
         appBar: AppBar(
-          backgroundColor: background,
+          surfaceTintColor: backgroundColor,
+          backgroundColor: backgroundColor,
           elevation: 0,
           centerTitle: true,
           title: Text(
             "Surah List",
-            style: TextStyle(
-                color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+              color: textprimary,
+              letterSpacing: 1,
+            ),
           ),
         ),
         body: FutureBuilder(
@@ -73,28 +79,55 @@ Widget AudioTile(
   return GestureDetector(
     onTap: onTap,
     child: Padding(
-      padding: const EdgeInsets.all(4.0),
+      padding: const EdgeInsets.all(10),
       child: Container(
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(8)),
-            color: Colors.white,
-            boxShadow: [BoxShadow()]),
+            color: containercolor,
+            boxShadow: [
+              BoxShadow(
+                  blurRadius: 3,
+                  spreadRadius: 0,
+                  color: Colors.black12,
+                  offset: Offset(0, 1))
+            ]),
         child: Row(
           children: [
+            // Container(
+            //   alignment: Alignment.center,
+            //   height: 30,
+            //   width: 40,
+            //   padding: EdgeInsets.all(8),
+            //   decoration:
+            //       BoxDecoration(shape: BoxShape.circle, color: Colors.black),
+            //   child: Text(
+            //     (number).toString(),
+            //     style: TextStyle(
+            //         color: Colors.white,
+            //         fontSize: 16,
+            //         fontWeight: FontWeight.bold),
+            //   ),
+            // ),
             Container(
+              height: 36,
+              width: 36,
               alignment: Alignment.center,
-              height: 30,
-              width: 40,
-              padding: EdgeInsets.all(8),
-              decoration:
-                  BoxDecoration(shape: BoxShape.circle, color: Colors.black),
-              child: Text(
-                (number).toString(),
-                style: TextStyle(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: textprimary,
+              ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  (number).toString(),
+                  maxLines: 1,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
             SizedBox(width: 20),
@@ -105,7 +138,7 @@ Widget AudioTile(
                   surahName!,
                   textAlign: TextAlign.end,
                   style: TextStyle(
-                      color: Colors.black,
+                      color: textprimary,
                       fontSize: 20,
                       fontWeight: FontWeight.bold),
                 ),
@@ -114,14 +147,15 @@ Widget AudioTile(
                 ),
                 Text(
                   "Total Aya : $totalAya",
-                  style: TextStyle(color: Colors.black45, fontSize: 16),
+                  style: TextStyle(
+                      color: Color.fromARGB(255, 110, 64, 30), fontSize: 16),
                 )
               ],
             ),
             Spacer(),
             Icon(
               Icons.play_circle_fill,
-              color: Constants.kPrimary,
+              color: textprimary,
             )
           ],
         ),

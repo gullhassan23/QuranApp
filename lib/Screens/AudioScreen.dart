@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:app5/Global.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:rxdart/rxdart.dart';
@@ -90,22 +91,19 @@ class _AudioScreenState extends State<AudioScreen> {
   Widget build(BuildContext context) {
     // double _width = MediaQuery.of(context).size.width;
     return Scaffold(
-      backgroundColor: dark,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: Icon(
-            Icons.arrow_back_ios,
-            color: Colors.black,
-          ),
-        ),
+        backgroundColor: backgroundColor,
+        automaticallyImplyLeading: true,
         title: Text(
           'Now Playing',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w800),
+          style: GoogleFonts.playfairDisplay(
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+            color: textprimary,
+            letterSpacing: 1,
+          ),
         ),
       ),
       body: SafeArea(
@@ -120,7 +118,7 @@ class _AudioScreenState extends State<AudioScreen> {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(20)),
-                    color: Constants.kPrimary,
+                    color: containercolor,
                     boxShadow: [
                       BoxShadow(
                           blurRadius: 1,
@@ -134,13 +132,13 @@ class _AudioScreenState extends State<AudioScreen> {
                       widget.list![currentIndex].name,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                          color: Colors.white,
+                          color: textprimary,
                           fontSize: 24,
                           fontWeight: FontWeight.bold),
                     ),
                     Text(
                       'Total Aya : ${widget.list![currentIndex].numberOfAyahs}',
-                      style: TextStyle(color: Colors.white, fontSize: 18),
+                      style: TextStyle(color: textprimary, fontSize: 18),
                     ),
                   ],
                 ),
@@ -193,7 +191,7 @@ class _AudioScreenState extends State<AudioScreen> {
                         },
                         icon: Icon(
                           FontAwesomeIcons.backward,
-                          color: Colors.black,
+                          color: textprimary,
                           size: MediaQuery.of(context).size.width * 0.05,
                         )),
                     StreamBuilder<PlayerState>(
@@ -226,12 +224,12 @@ class _AudioScreenState extends State<AudioScreen> {
                               //height: _width * 0.24,
                               padding: EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Constants.kPrimary,
+                                color: containercolor,
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Icon(
                                 FontAwesomeIcons.play,
-                                color: Colors.black,
+                                color: textprimary,
                                 size: MediaQuery.of(context).size.width * 0.05,
                               ),
                             ),
@@ -245,12 +243,12 @@ class _AudioScreenState extends State<AudioScreen> {
                               //  height: _width * 0.24,
                               padding: EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Constants.kPrimary,
+                                color: containercolor,
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Icon(
                                 FontAwesomeIcons.pause,
-                                color: Colors.black,
+                                color: textprimary,
                                 size: MediaQuery.of(context).size.width * 0.05,
                               ),
                             ),
@@ -263,12 +261,12 @@ class _AudioScreenState extends State<AudioScreen> {
                               //  height: _width * 0.24,
                               padding: EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Constants.kPrimary,
+                                color: containercolor,
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Icon(
                                 Icons.shuffle,
-                                color: Colors.black,
+                                color: textprimary,
                                 size: MediaQuery.of(context).size.width * 0.05,
                               ),
                             ),
@@ -297,12 +295,13 @@ class _AudioScreenState extends State<AudioScreen> {
                       },
                       icon: Icon(
                         FontAwesomeIcons.forward,
-                        color: Colors.black,
+                        color: textprimary,
                         size: MediaQuery.of(context).size.width * 0.05,
                       ),
                     ),
                     IconButton(
                       icon: Icon(
+                        color: textprimary,
                         Icons.volume_up,
                         size: MediaQuery.of(context).size.width * 0.1,
                       ),
@@ -325,7 +324,9 @@ class _AudioScreenState extends State<AudioScreen> {
                       builder: (context, snapshot) => IconButton(
                         icon: Text("${snapshot.data?.toStringAsFixed(1)}x",
                             style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 20)),
+                                color: textprimary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20)),
                         onPressed: () {
                           showSliderDialog(
                             context: context,
@@ -348,80 +349,78 @@ class _AudioScreenState extends State<AudioScreen> {
               ),
               currentIndex >= 113
                   ? Container()
-                  : Expanded(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(20)),
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 8,
-                                spreadRadius: 0.01,
-                                offset: Offset(0.0, 1),
+                  : Container(
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                          color: containercolor,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 8,
+                              spreadRadius: 0.01,
+                              offset: Offset(0.0, 1),
+                            ),
+                          ]),
+                      child: Padding(
+                        padding: const EdgeInsets.all(18.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'UPCOMING SURAH',
+                              style: TextStyle(
+                                  color: textprimary,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(
+                              height: 12,
+                            ),
+                            Visibility(
+                              visible: (currentIndex <= 112) ? true : false,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Icon(
+                                    Icons.play_circle_fill,
+                                    color: textprimary,
+                                  ),
+                                  Text(
+                                    widget.list![currentIndex + 1].name,
+                                    style: TextStyle(
+                                        color: textprimary, fontSize: 20),
+                                  ),
+                                ],
                               ),
-                            ]),
-                        child: Padding(
-                          padding: const EdgeInsets.all(18.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'UPCOMING SURAH',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(
+                              height: 12,
+                            ),
+                            Visibility(
+                              visible: (currentIndex <= 111) ? true : false,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Icon(
+                                    currentIndex > 111
+                                        ? null
+                                        : Icons.play_circle_fill,
+                                    color: textprimary,
+                                  ),
+                                  Text(
+                                    currentIndex > 111
+                                        ? ''
+                                        : widget.list![currentIndex + 2].name,
+                                    style: TextStyle(
+                                        color: textprimary, fontSize: 20),
+                                  ),
+                                ],
                               ),
-                              SizedBox(
-                                height: 12,
-                              ),
-                              Visibility(
-                                visible: (currentIndex <= 112) ? true : false,
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Icon(
-                                      Icons.play_circle_fill,
-                                      color: Constants.kPrimary,
-                                    ),
-                                    Text(
-                                      widget.list![currentIndex + 1].name,
-                                      style: TextStyle(
-                                          color: Colors.black, fontSize: 20),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                height: 12,
-                              ),
-                              Visibility(
-                                visible: (currentIndex <= 111) ? true : false,
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Icon(
-                                      currentIndex > 111
-                                          ? null
-                                          : Icons.play_circle_fill,
-                                      color: Constants.kPrimary,
-                                    ),
-                                    Text(
-                                      currentIndex > 111
-                                          ? ''
-                                          : widget.list![currentIndex + 2].name,
-                                      style: TextStyle(
-                                          color: Colors.black, fontSize: 20),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -492,10 +491,10 @@ class _SeekBarState extends State<SeekBar> {
       children: [
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
-            activeTrackColor: Constants.kPrimary,
+            activeTrackColor: textprimary,
             inactiveTrackColor: Colors.grey,
             trackHeight: 5.0,
-            thumbColor: Constants.kPrimary,
+            thumbColor: textprimary,
             thumbShape: RoundSliderThumbShape(enabledThumbRadius: 10),
             overlayColor: Colors.purple.withAlpha(32),
             overlayShape: RoundSliderOverlayShape(overlayRadius: 14.0),
@@ -524,14 +523,14 @@ class _SeekBarState extends State<SeekBar> {
               Text(
                 _positionText,
                 style: TextStyle(
-                    color: Colors.black,
+                    color: textprimary,
                     // fontFamily: MyFont.alegreyaSansRegular,
                     fontSize: _width * 0.05),
               ),
               Text(
                 _durationText,
                 style: TextStyle(
-                    color: Colors.black,
+                    color: textprimary,
                     //  fontFamily: MyFont.alegreyaSansRegular,
                     fontSize: _width * 0.05),
               ),

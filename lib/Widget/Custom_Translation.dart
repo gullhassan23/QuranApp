@@ -1,5 +1,5 @@
 import 'package:app5/Global.dart';
-import 'package:app5/constants/constants.dart';
+
 import 'package:app5/model/Translation.dart';
 import 'package:flutter/material.dart';
 
@@ -15,8 +15,9 @@ class TranslationTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
+        margin: EdgeInsets.all(10.0),
         decoration: BoxDecoration(
-            color: background,
+            color: backgroundColor,
             shape: BoxShape.rectangle,
             borderRadius: BorderRadius.all(Radius.circular(8)),
             boxShadow: [BoxShadow(blurRadius: 1)]),
@@ -27,7 +28,7 @@ class TranslationTile extends StatelessWidget {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                      color: Constants.kPrimary,
+                      color: containercolor,
                       borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(8),
                           topRight: Radius.circular(8))),
@@ -42,7 +43,7 @@ class TranslationTile extends StatelessWidget {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.black,
+                      color: textprimary,
                     ),
                     child: Text(
                       surahTranslation.aya!,
@@ -61,14 +62,14 @@ class TranslationTile extends StatelessWidget {
                     surahTranslation.arabic_text!,
                     textAlign: TextAlign.end,
                     style: TextStyle(
-                        color: Colors.white70,
+                        color: textprimary,
                         fontWeight: FontWeight.bold,
                         fontSize: 24),
                   ),
                   Text(
                     surahTranslation.translation!,
                     textAlign: TextAlign.end,
-                    style: TextStyle(color: Colors.white, fontSize: 18),
+                    style: TextStyle(color: textprimary, fontSize: 18),
                   )
                 ],
               ),

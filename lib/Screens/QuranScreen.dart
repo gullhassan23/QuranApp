@@ -8,6 +8,7 @@ import 'package:app5/constants/constants.dart';
 import 'package:app5/model/Surah.dart';
 import 'package:app5/model/sajda.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class QuranScreen extends StatefulWidget {
   const QuranScreen({super.key});
@@ -25,35 +26,41 @@ class _QuranScreenState extends State<QuranScreen> {
         initialIndex: 0,
         child: SafeArea(
             child: Scaffold(
+          backgroundColor: backgroundColor,
           appBar: AppBar(
-            backgroundColor: background,
+            backgroundColor: backgroundColor,
             centerTitle: true,
             bottom: TabBar(
               tabs: [
                 Text(
                   "Surah",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 20),
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: textprimary,
+                    letterSpacing: 1,
+                  ),
                 ),
                 Text(
                   "Sajda",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 20),
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: textprimary,
+                    letterSpacing: 1,
+                  ),
                 ),
                 Text(
                   "Juz",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 20),
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: textprimary,
+                    letterSpacing: 1,
+                  ),
                 ),
               ],
             ),
-            title: Text("Quran"),
           ),
           body: TabBarView(
             children: [
@@ -83,21 +90,36 @@ class _QuranScreenState extends State<QuranScreen> {
                   }),
               FutureBuilder(
                 future: apiServices.getSajda(),
-                builder: (context,AsyncSnapshot<SajdaList> snapshot){
-                  if(snapshot.hasError){
-                    return Center(child: Text('Something went wrong'),);
+                builder: (context, AsyncSnapshot<SajdaList> snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Something went wrong'),
+                    );
                   }
-                  if(snapshot.connectionState == ConnectionState.waiting){
-                    return Center(child: CircularProgressIndicator(),);
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
                   }
                   return ListView.builder(
                     itemCount: snapshot.data!.sajdaAyahs.length,
-                    itemBuilder: (context , index) => SajdaCustomTile(snapshot.data!.sajdaAyahs[index], context),
+                    itemBuilder: (context, index) => SajdaCustomTile(
+                        snapshot.data!.sajdaAyahs[index], context),
                   );
                 },
               ),
               GestureDetector(
                 child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0xFFF6D7C3), // light peach
+                        Color(0xFFF2C6AD), // darker peach
+                      ],
+                    ),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: GridView.builder(
@@ -115,12 +137,15 @@ class _QuranScreenState extends State<QuranScreen> {
                             },
                             child: Card(
                               elevation: 4,
-                              color: Colors.blueGrey,
+                              color: containercolor,
                               child: Center(
                                 child: Text(
                                   '${index + 1}',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 30),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 25,
+                                    color: textprimary,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
                             ),

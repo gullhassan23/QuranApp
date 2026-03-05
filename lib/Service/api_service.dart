@@ -12,13 +12,13 @@ import 'package:app5/model/qari.dart';
 import 'package:app5/model/sajda.dart';
 
 class ApiServices {
-  final endPointUrl = "http://api.alquran.cloud/v1/surah";
+  final endPointUrl = "https://api.alquran.cloud/v1/surah";
   List<Surah> list = [];
   Future<AyaOfTheDay> getAyaOfTheDay() async {
     // for random AYA we need to generate random number
     // (1,6237) from 1 to 6236
     String url =
-        "http://api.alquran.cloud/v1/ayah/${random(1, 6237)}/editions/quran-uthmani,en.asad,en.pickthall ";
+        "https://api.alquran.cloud/v1/ayah/${random(1, 6237)}/editions/quran-uthmani,en.asad,en.pickthall";
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
@@ -52,7 +52,7 @@ class ApiServices {
   }
 
   Future<SajdaList> getSajda() async {
-    String url = "http://api.alquran.cloud/v1/sajda/en.asad";
+    String url = "https://api.alquran.cloud/v1/sajda/en.asad";
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
@@ -64,7 +64,7 @@ class ApiServices {
   }
 
   Future<JuzModel> getJuzz(int index) async {
-    String url = "http://api.alquran.cloud/v1/juz/$index/quran-uthmani";
+    String url = "https://api.alquran.cloud/v1/juz/$index/quran-uthmani";
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
