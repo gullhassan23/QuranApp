@@ -156,6 +156,21 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF4D8B5E),
+          brightness: Brightness.light,
+        ),
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF4D8B5E),
+          brightness: Brightness.dark,
+        ),
+      ),
+      themeMode: ThemeMode.system,
       home: _HomeWithLaunchCheck(
         alreadyUsed: _alreadyUsed,
         onFrameCallback: _checkNotificationLaunch,

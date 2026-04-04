@@ -145,7 +145,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
           builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
-                child: CircularProgressIndicator(color: Constants.kPrimary),
+                child: CircularProgressIndicator(color: Colors.brown),
               );
             }
             final coordinates = _getCoordinates();
@@ -244,39 +244,6 @@ class _PrayerScreenState extends State<PrayerScreen> {
   }
 }
 
-class _TestAlarmButton extends StatelessWidget {
-  const _TestAlarmButton({
-    required this.label,
-    required this.onPressed,
-  });
-
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: containercolor,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          child: Text(
-            label,
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: textprimary,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _PrayerRow extends StatelessWidget {
   const _PrayerRow({
     required this.label,
@@ -320,6 +287,8 @@ class _PrayerRow extends StatelessWidget {
       value: isEnabled,
       onChanged: (_) => onAlarmToggle(alarmPrayer, time),
       activeColor: accentgreen,
+      inactiveThumbColor: backgroundColor,
+      inactiveTrackColor: accentgreen,
       contentPadding:
           const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
     );

@@ -3,6 +3,7 @@ import 'package:app5/Screens/PrayerScreen.dart';
 
 import 'package:app5/Screens/QariScreen.dart';
 import 'package:app5/Screens/QuranScreen.dart';
+import 'package:app5/hadith/presentation/hadith_books_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -20,6 +21,7 @@ class _BottomWState extends State<BottomW> {
     PrayerScreen(),
     QuranScreen(),
     QariScreen(),
+    const HadithBooksScreen(),
   ];
   @override
   Widget build(BuildContext context) {
@@ -68,6 +70,10 @@ class _BottomWState extends State<BottomW> {
             BottomNavigationBarItem(
               icon: Icon(Icons.music_note_outlined),
               label: "Quran",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.menu_book_outlined, size: 28),
+              label: "Hadith",
             ),
           ],
           onTap: (index) {

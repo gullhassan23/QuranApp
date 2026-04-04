@@ -27,7 +27,9 @@ class _Hijri2WidgetState extends State<Hijri2Widget> {
                 return const Padding(
                   padding: EdgeInsets.all(20),
                   child: Center(
-                    child: CircularProgressIndicator(),
+                    child: CircularProgressIndicator(
+                      color: Colors.brown,
+                    ),
                   ),
                 );
               }
@@ -36,7 +38,9 @@ class _Hijri2WidgetState extends State<Hijri2Widget> {
                 return const Padding(
                   padding: EdgeInsets.all(20),
                   child: Center(
-                    child: CircularProgressIndicator(), // retry loader if error
+                    child: CircularProgressIndicator(
+                      color: Colors.brown,
+                    ), // retry loader if error
                   ),
                 );
               }
@@ -45,7 +49,9 @@ class _Hijri2WidgetState extends State<Hijri2Widget> {
                 return const Padding(
                   padding: EdgeInsets.all(20),
                   child: Center(
-                    child: CircularProgressIndicator(),
+                    child: CircularProgressIndicator(
+                      color: Colors.brown,
+                    ),
                   ),
                 );
               }

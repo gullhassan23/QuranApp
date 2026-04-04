@@ -2,6 +2,7 @@ import 'package:app5/Global.dart';
 import 'package:app5/Widget/Hijri2W.dart';
 import 'package:app5/Widget/HijriW.dart';
 import 'package:app5/constants/constants.dart';
+import 'package:app5/hadith/presentation/hadith_books_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -123,6 +124,71 @@ class _HomeState extends State<Home> {
                     // ),
                     //  next widget
                     Hijri2Widget(),
+                    // Padding(
+                    //   padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+                    //   child: Material(
+                    //     color: cardcolor,
+                    //     borderRadius: BorderRadius.circular(18),
+                    //     elevation: 2,
+                    //     shadowColor: Colors.black26,
+                    //     child: InkWell(
+                    //       borderRadius: BorderRadius.circular(18),
+                    //       onTap: () {
+                    //         Navigator.of(context).push(
+                    //           MaterialPageRoute<void>(
+                    //             builder: (_) => const HadithBooksScreen(),
+                    //           ),
+                    //         );
+                    //       },
+                    //       child: Padding(
+                    //         padding: const EdgeInsets.all(20),
+                    //         child: Row(
+                    //           children: [
+                    //             Container(
+                    //               padding: const EdgeInsets.all(12),
+                    //               decoration: BoxDecoration(
+                    //                 color: accentgreen.withValues(alpha: 0.15),
+                    //                 borderRadius: BorderRadius.circular(14),
+                    //               ),
+                    //               child: Icon(
+                    //                 Icons.menu_book_rounded,
+                    //                 color: accentgreen,
+                    //                 size: 32,
+                    //               ),
+                    //             ),
+                    //             const SizedBox(width: 16),
+                    //             Expanded(
+                    //               child: Column(
+                    //                 crossAxisAlignment:
+                    //                     CrossAxisAlignment.start,
+                    //                 children: [
+                    //                   Text(
+                    //                     'Explore Hadith',
+                    //                     style: GoogleFonts.playfairDisplay(
+                    //                       fontSize: 20,
+                    //                       fontWeight: FontWeight.w600,
+                    //                       color: textprimary,
+                    //                     ),
+                    //                   ),
+                    //                   const SizedBox(height: 6),
+                    //                   Text(
+                    //                     'Browse Sahih Bukhari, Muslim, and more',
+                    //                     style: GoogleFonts.poppins(
+                    //                       fontSize: 13,
+                    //                       color: dark,
+                    //                       height: 1.35,
+                    //                     ),
+                    //                   ),
+                    //                 ],
+                    //               ),
+                    //             ),
+                    //             Icon(Icons.chevron_right, color: textprimary),
+                    //           ],
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),

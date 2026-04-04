@@ -131,6 +131,7 @@ class _QuranScreenState extends State<QuranScreen> {
             backgroundColor: backgroundColor,
             centerTitle: true,
             bottom: TabBar(
+              indicatorColor: Colors.brown,
               tabs: [
                 Text(
                   "Surah",
@@ -169,7 +170,7 @@ class _QuranScreenState extends State<QuranScreen> {
                   builder: (BuildContext context,
                       AsyncSnapshot<List<Surah>> snapshot) {
                     if (!snapshot.hasData) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator(color: Colors.brown,),);
                     }
                     final all = snapshot.data!;
                     final filtered =
@@ -225,7 +226,7 @@ class _QuranScreenState extends State<QuranScreen> {
                   }
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator(color: Colors.brown,),
                     );
                   }
                   final all = snapshot.data!.sajdaAyahs;

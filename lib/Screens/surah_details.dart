@@ -32,7 +32,9 @@ class _SurahDetailsState extends State<SurahDetails> {
             AsyncSnapshot<SurahTranslationList> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                color: Colors.brown,
+              ),
             );
           } else if (snapshot.hasData) {
             return Scaffold(

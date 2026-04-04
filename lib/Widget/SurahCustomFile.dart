@@ -58,9 +58,13 @@ Widget SurahCustomListTile(
                 children: [
                   Text(
                     surah.englishName,
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: Colors.black54, fontWeight: FontWeight.bold),
                   ),
-                  Text(surah.englishNameTranslation),
+                  Text(
+                    surah.englishNameTranslation,
+                    style: TextStyle(color: Colors.black54),
+                  ),
                 ],
               ),
               Spacer(),

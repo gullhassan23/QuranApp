@@ -24,7 +24,7 @@ class _JuzScreenState extends State<JuzScreen> {
         builder: (context, AsyncSnapshot<JuzModel> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(color: Colors.brown,),
             );
           } else if (snapshot.hasData) {
             print('${snapshot.data!.juzAyahs.length}');

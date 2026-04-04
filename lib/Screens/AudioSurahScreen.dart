@@ -59,6 +59,7 @@ class _AudioSurahScreenState extends State<AudioSurahScreen> {
           backgroundColor: backgroundColor,
           elevation: 0,
           centerTitle: true,
+          iconTheme: IconThemeData(color: Colors.brown),
           title: Text(
             "Surah List",
             style: GoogleFonts.playfairDisplay(
@@ -74,7 +75,9 @@ class _AudioSurahScreenState extends State<AudioSurahScreen> {
           builder: (BuildContext context, AsyncSnapshot<List<Surah>> snapshot) {
             if (!snapshot.hasData) {
               return const Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  color: Colors.brown,
+                ),
               );
             }
             final all = snapshot.data!;

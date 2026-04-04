@@ -27,6 +27,7 @@ dependencies:
 
   # Storage & utilities
   shared_preferences: ^2.0.18
+  share_plus: ^10.1.4
   hijri: ^3.0.0
   location: ^8.0.1
 

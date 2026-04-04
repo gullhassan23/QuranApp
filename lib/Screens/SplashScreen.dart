@@ -47,6 +47,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         final w = MediaQuery.sizeOf(context).width;
                         final logoSize = (w * 0.55).clamp(180.0, 320.0);
                         return Image.asset(
+                          color: Color(0xFF785344),
                           'assets/images/logo.png',
                           width: logoSize,
                           fit: BoxFit.contain,
@@ -60,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         'Learn Quran and Recite once everyday',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.poppins(
-                          color: Colors.white70,
+                          color: Colors.black,
                           fontSize: 15,
                         ),
                       ),
