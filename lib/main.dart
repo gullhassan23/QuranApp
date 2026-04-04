@@ -1,16 +1,24 @@
 import 'dart:convert';
 
 import 'package:app5/Service/notification_provider.dart';
-import 'package:app5/Service/prayer_alarm_service.dart';
+import 'package:app5/Service/prayer_alarm_service.dart'
+    show
+        payloadPrayer,
+        payloadTime,
+        payloadType,
+        payloadTypePrayerAlarm,
+        PrayerAlarmService;
 import 'package:app5/Screens/AlarmScreen.dart';
 import 'package:app5/Screens/Juz_screen.dart';
 import 'package:app5/Screens/SplashScreen.dart';
 import 'package:app5/Screens/surah_details.dart';
 import 'package:app5/Widget/BottomW.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io' show Platform;
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -119,6 +127,28 @@ class _MyAppState extends State<MyApp> {
         _openAlarmScreenIfPrayerPayload(response.payload!);
       }
     });
+    // If app was opened from native alarm (full-screen intent), open AlarmScreen.
+    if (Platform.isAndroid) {
+      _checkAlarmLaunchPayload();
+    }
+  }
+
+  Future<void> _checkAlarmLaunchPayload() async {
+    try {
+      await Future.delayed(const Duration(milliseconds: 500));
+      const channel = MethodChannel('com.example.app5/prayer_alarm');
+      final payload = await channel
+          .invokeMethod<Map<dynamic, dynamic>>('getAlarmLaunchPayload');
+      if (payload == null) return;
+      if (navigatorKey.currentState == null) return;
+      final prayerName = payload['prayerName'] as String? ?? 'Prayer';
+      final timeFormatted = payload['timeFormatted'] as String? ?? '';
+      final args = jsonEncode({
+        payloadPrayer: prayerName,
+        payloadTime: timeFormatted,
+      });
+      navigatorKey.currentState?.pushNamed(AlarmScreen.id, arguments: args);
+    } catch (_) {}
   }
 
   @override

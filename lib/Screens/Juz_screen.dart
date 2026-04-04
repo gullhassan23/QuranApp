@@ -18,6 +18,7 @@ class _JuzScreenState extends State<JuzScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
+          
       body: FutureBuilder<JuzModel>(
         future: apiServices.getJuzz(Constants.juzIndex!),
         builder: (context, AsyncSnapshot<JuzModel> snapshot) {

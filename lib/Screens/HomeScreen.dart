@@ -58,7 +58,7 @@ class _HomeState extends State<Home> {
                             bottom: 0,
                             right: 20,
                             child: Image.asset(
-                              "assets/images/Quran.png",
+                              "assets/images/Q.png",
                               height: 100,
                               width: 170,
                               color: textprimary,

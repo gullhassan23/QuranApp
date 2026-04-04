@@ -52,7 +52,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
 
   Future<void> _playAlarmSound() async {
     try {
-      await _audioPlayer.setAsset('assets/audio/azan.mp3');
+      await _audioPlayer.setAsset('assets/audio/alarm.wav');
       await _audioPlayer.setLoopMode(LoopMode.one);
       await _audioPlayer.play();
     } catch (_) {

@@ -19,7 +19,36 @@ class AudioSurahScreen extends StatefulWidget {
 }
 
 class _AudioSurahScreenState extends State<AudioSurahScreen> {
-  ApiServices apiServices = ApiServices();
+  final ApiServices apiServices = ApiServices();
+  final TextEditingController _searchController = TextEditingController();
+  late final Future<List<Surah>> _surahsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _surahsFuture = apiServices.getSurah();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<Surah> _filterSurahs(List<Surah> all, String query) {
+    final q = query.trim();
+    if (q.isEmpty) return all;
+    final lower = q.toLowerCase();
+    final digitsOnly = RegExp(r'^\d+$').hasMatch(q);
+    return all.where((s) {
+      if (s.englishName.toLowerCase().contains(lower)) return true;
+      if (s.englishNameTranslation.toLowerCase().contains(lower)) return true;
+      if (s.name.contains(q)) return true;
+      if (digitsOnly && s.number.toString().contains(q)) return true;
+      return false;
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -40,29 +69,97 @@ class _AudioSurahScreenState extends State<AudioSurahScreen> {
             ),
           ),
         ),
-        body: FutureBuilder(
-          future: apiServices.getSurah(),
+        body: FutureBuilder<List<Surah>>(
+          future: _surahsFuture,
           builder: (BuildContext context, AsyncSnapshot<List<Surah>> snapshot) {
-            if (snapshot.hasData) {
-              List<Surah>? surah = snapshot.data;
-              return ListView.builder(
-                  itemCount: surah!.length,
-                  itemBuilder: (context, index) => AudioTile(
-                      surahName: snapshot.data![index].englishName,
-                      totalAya: snapshot.data![index].numberOfAyahs,
-                      number: snapshot.data![index].number,
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => AudioScreen(
-                                    qari: widget.qari,
-                                    index: index + 1,
-                                    list: surah)));
-                      }));
+            if (!snapshot.hasData) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
             }
-            return Center(
-              child: CircularProgressIndicator(),
+            final all = snapshot.data!;
+            final filtered = _filterSurahs(all, _searchController.text);
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (_) => setState(() {}),
+                    style: GoogleFonts.poppins(
+                      color: textprimary,
+                      fontSize: 15,
+                    ),
+                    cursorColor: textprimary,
+                    decoration: InputDecoration(
+                      hintText: 'Search by name, translation, or number…',
+                      hintStyle: GoogleFonts.poppins(
+                        color: dark.withOpacity(0.6),
+                        fontSize: 14,
+                      ),
+                      prefixIcon: Icon(Icons.search, color: textprimary),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(Icons.clear, color: textprimary),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() {});
+                              },
+                            )
+                          : null,
+                      filled: true,
+                      fillColor: containercolor,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: filtered.isEmpty
+                      ? Center(
+                          child: Text(
+                            'No surah found',
+                            style: GoogleFonts.poppins(
+                              color: dark,
+                              fontSize: 16,
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          itemCount: filtered.length,
+                          itemBuilder: (context, index) {
+                            final s = filtered[index];
+                            return AudioTile(
+                              surahName: s.englishName,
+                              totalAya: s.numberOfAyahs,
+                              number: s.number,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => AudioScreen(
+                                      qari: widget.qari,
+                                      index: s.number,
+                                      list: all,
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                ),
+              ],
             );
           },
         ),

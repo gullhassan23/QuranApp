@@ -3,6 +3,7 @@ import 'package:app5/Global.dart';
 import 'package:app5/constants/constants.dart';
 import 'package:app5/Service/notification_provider.dart';
 import 'package:app5/Service/prayer_alarm_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -62,18 +63,61 @@ class _PrayerScreenState extends State<PrayerScreen> {
   }
 
   Future<void> _onAlarmToggle(String prayerName, String time) async {
-    final newSelection =
-        _selectedAlarmPrayer == prayerName ? null : prayerName;
+    final newSelection = _selectedAlarmPrayer == prayerName ? null : prayerName;
     setState(() => _selectedAlarmPrayer = newSelection);
     if (newSelection != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Your alarm is set on $time')),
       );
+      final canExact = await PrayerAlarmService.canScheduleExactAlarms();
+      if (!canExact && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Allow "Alarms & reminders" in settings for the alarm to fire on time.',
+            ),
+            action: SnackBarAction(
+              label: 'Open settings',
+              onPressed: () => PrayerAlarmService.openExactAlarmSettings(),
+            ),
+          ),
+        );
+      }
     }
     try {
       await prayerAlarmService.setEnabledPrayer(newSelection);
-    } catch (_) {
-      if (mounted) setState(() => _selectedAlarmPrayer = _selectedAlarmPrayer);
+    } catch (e) {
+      if (kDebugMode) debugPrint('Prayer alarm setEnabledPrayer error: $e');
+      if (mounted) {
+        setState(() => _selectedAlarmPrayer = _selectedAlarmPrayer);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content:
+                Text('Could not set alarm. Check notification permission.'),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _scheduleTestAlarm(Duration fromNow) async {
+    final ok = await PrayerAlarmService.scheduleTestAlarm(fromNow);
+    if (!mounted) return;
+    final minutes = fromNow.inMinutes;
+    if (ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            minutes <= 1
+                ? 'Test alarm in 1 minute'
+                : 'Test alarm in $minutes minutes',
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not set test alarm.')),
+      );
     }
   }
 
@@ -82,6 +126,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
+          surfaceTintColor: backgroundColor,
           backgroundColor: backgroundColor,
           centerTitle: true,
           title: Text(
@@ -110,76 +155,122 @@ class _PrayerScreenState extends State<PrayerScreen> {
 
             return Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  _PrayerRow(
-                    label: 'Fajr',
-                    time: DateFormat.jm().format(prayerTimes.fajr),
-                    alarmPrayer: 'Fajr',
-                    selectedAlarmPrayer: _selectedAlarmPrayer,
-                    onAlarmToggle: _onAlarmToggle,
-                  ),
-                  const Divider(color: Colors.black, thickness: 1),
-                  Padding(
-                    padding: const EdgeInsets.all(18.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Sunrise',
-                          style: GoogleFonts.poppins(
-                            fontSize: 15,
-                            color: textprimary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Text(
-                          DateFormat.jm().format(prayerTimes.sunrise),
-                          style: GoogleFonts.poppins(
-                            fontSize: 15,
-                            color: textprimary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    _PrayerRow(
+                      label: 'Fajr',
+                      time: DateFormat.jm().format(prayerTimes.fajr),
+                      alarmPrayer: 'Fajr',
+                      selectedAlarmPrayer: _selectedAlarmPrayer,
+                      onAlarmToggle: _onAlarmToggle,
                     ),
-                  ),
-                  const Divider(color: Colors.black, thickness: 1),
-                  _PrayerRow(
-                    label: 'Zuhr',
-                    time: DateFormat.jm().format(prayerTimes.dhuhr),
-                    alarmPrayer: 'Zuhr',
-                    selectedAlarmPrayer: _selectedAlarmPrayer,
-                    onAlarmToggle: _onAlarmToggle,
-                  ),
-                  const Divider(color: Colors.black, thickness: 1),
-                  _PrayerRow(
-                    label: 'Asar',
-                    time: DateFormat.jm().format(prayerTimes.asr),
-                    alarmPrayer: 'Asr',
-                    selectedAlarmPrayer: _selectedAlarmPrayer,
-                    onAlarmToggle: _onAlarmToggle,
-                  ),
-                  const Divider(color: Colors.black, thickness: 1),
-                  _PrayerRow(
-                    label: 'Maghrib',
-                    time: DateFormat.jm().format(prayerTimes.maghrib),
-                    alarmPrayer: 'Maghrib',
-                    selectedAlarmPrayer: _selectedAlarmPrayer,
-                    onAlarmToggle: _onAlarmToggle,
-                  ),
-                  const Divider(color: Colors.black, thickness: 1),
-                  _PrayerRow(
-                    label: 'Isha',
-                    time: DateFormat.jm().format(prayerTimes.isha),
-                    alarmPrayer: 'Isha',
-                    selectedAlarmPrayer: _selectedAlarmPrayer,
-                    onAlarmToggle: _onAlarmToggle,
-                  ),
-                ],
+                    const Divider(color: Colors.black, thickness: 1),
+                    _PrayerRow(
+                      label: 'Sunrise',
+                      time: DateFormat.jm().format(prayerTimes.sunrise),
+                      alarmPrayer: 'Sunrise',
+                      selectedAlarmPrayer: _selectedAlarmPrayer,
+                      onAlarmToggle: _onAlarmToggle,
+                    ),
+                    const Divider(color: Colors.black, thickness: 1),
+                    _PrayerRow(
+                      label: 'Zuhr',
+                      time: DateFormat.jm().format(prayerTimes.dhuhr),
+                      alarmPrayer: 'Zuhr',
+                      selectedAlarmPrayer: _selectedAlarmPrayer,
+                      onAlarmToggle: _onAlarmToggle,
+                    ),
+                    const Divider(color: Colors.black, thickness: 1),
+                    _PrayerRow(
+                      label: 'Asar',
+                      time: DateFormat.jm().format(prayerTimes.asr),
+                      alarmPrayer: 'Asr',
+                      selectedAlarmPrayer: _selectedAlarmPrayer,
+                      onAlarmToggle: _onAlarmToggle,
+                    ),
+                    const Divider(color: Colors.black, thickness: 1),
+                    _PrayerRow(
+                      label: 'Maghrib',
+                      time: DateFormat.jm().format(prayerTimes.maghrib),
+                      alarmPrayer: 'Maghrib',
+                      selectedAlarmPrayer: _selectedAlarmPrayer,
+                      onAlarmToggle: _onAlarmToggle,
+                    ),
+                    const Divider(color: Colors.black, thickness: 1),
+                    _PrayerRow(
+                      label: 'Isha',
+                      time: DateFormat.jm().format(prayerTimes.isha),
+                      alarmPrayer: 'Isha',
+                      selectedAlarmPrayer: _selectedAlarmPrayer,
+                      onAlarmToggle: _onAlarmToggle,
+                    ),
+                    const Divider(color: Colors.black, thickness: 1),
+                    // Padding(
+                    //   padding: const EdgeInsets.symmetric(vertical: 12.0),
+                    //   child: Text(
+                    //     'Test alarm',
+                    //     style: GoogleFonts.poppins(
+                    //       fontSize: 14,
+                    //       color: dark,
+                    //       fontWeight: FontWeight.w500,
+                    //     ),
+                    //   ),
+                    // ),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.center,
+                    //   children: [
+                    //     _TestAlarmButton(
+                    //       label: 'Ring in 1 min',
+                    //       onPressed: () =>
+                    //           _scheduleTestAlarm(const Duration(minutes: 1)),
+                    //     ),
+                    //     const SizedBox(width: 12),
+                    //     _TestAlarmButton(
+                    //       label: 'Ring in 2 min',
+                    //       onPressed: () =>
+                    //           _scheduleTestAlarm(const Duration(minutes: 2)),
+                    //     ),
+                    //   ],
+                    // ),
+                  ],
+                ),
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _TestAlarmButton extends StatelessWidget {
+  const _TestAlarmButton({
+    required this.label,
+    required this.onPressed,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: containercolor,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: textprimary,
+            ),
+          ),
         ),
       ),
     );
@@ -229,7 +320,8 @@ class _PrayerRow extends StatelessWidget {
       value: isEnabled,
       onChanged: (_) => onAlarmToggle(alarmPrayer, time),
       activeColor: accentgreen,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
     );
   }
 }

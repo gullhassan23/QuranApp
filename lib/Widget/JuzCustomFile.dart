@@ -1,3 +1,4 @@
+import 'package:app5/Global.dart';
 import 'package:app5/model/Juz.dart';
 
 import 'package:flutter/material.dart';
@@ -13,8 +14,8 @@ class JuzCustomTile extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 3.0)]),
+          color: backgroundColor,
+          boxShadow: [BoxShadow(color: textprimary, blurRadius: 3.0)]),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -24,7 +25,8 @@ class JuzCustomTile extends StatelessWidget {
           ),
           Text(
             list[index].ayahsText.toString(),
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700),
+            style: TextStyle(
+                fontSize: 30, color: textprimary, fontWeight: FontWeight.w700),
             textAlign: TextAlign.end,
           ),
           Text(

@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
 
 import 'package:adhan/adhan.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -17,8 +20,8 @@ const String _keyAlarmLng = 'prayer_alarm_lng';
 const int prayerAlarmNotificationId = 100;
 const int snoozeNotificationId = 101;
 
-/// Prayer names that can be enabled (matches UI; "Zuhr" not "Dhuhr" for display).
-const List<String> prayerAlarmOptions = ['Fajr', 'Zuhr', 'Asr', 'Maghrib', 'Isha'];
+/// Prayer names that can be enabled (matches UI; "Zuhr" not "Dhuhr" for display). Sunrise added for testing.
+const List<String> prayerAlarmOptions = ['Fajr', 'Sunrise', 'Zuhr', 'Asr', 'Maghrib', 'Isha'];
 
 /// Default coordinates (fallback when location not available).
 const double _defaultLat = 30.8138;
@@ -33,11 +36,16 @@ const String payloadTypePrayerAlarm = 'prayer_alarm';
 /// Snooze duration.
 const Duration snoozeDuration = Duration(minutes: 5);
 
+/// Method channel for Android exact-alarm permission (Android 12+).
+const MethodChannel _exactAlarmChannel = MethodChannel('com.example.app5/prayer_alarm');
+
 class PrayerAlarmService {
   PrayerAlarmService(this._notificationsPlugin);
 
   final FlutterLocalNotificationsPlugin _notificationsPlugin;
   static bool _timezoneInitialized = false;
+  /// When true, named timezone failed; we build TZDateTime from device local instant instead.
+  static bool _timezoneFallback = false;
 
   static Future<void> ensureTimezoneInitialized() async {
     if (_timezoneInitialized) return;
@@ -46,7 +54,11 @@ class PrayerAlarmService {
       final String timeZoneName = await FlutterTimezone.getLocalTimezone();
       tz.setLocalLocation(tz.getLocation(timeZoneName));
     } catch (_) {
-      tz.setLocalLocation(tz.getLocation('UTC'));
+      _timezoneFallback = true;
+      if (kDebugMode) {
+        debugPrint('Prayer alarm timezone fallback: using device offset');
+      }
+      tz.setLocalLocation(tz.UTC);
     }
     _timezoneInitialized = true;
   }
@@ -73,18 +85,72 @@ class PrayerAlarmService {
     return prefs.getString(_keyEnabledPrayer);
   }
 
+  /// On Android 12+, returns whether the app can schedule exact alarms. On other platforms, returns true.
+  static Future<bool> canScheduleExactAlarms() async {
+    if (!Platform.isAndroid) return true;
+    try {
+      final r = await _exactAlarmChannel.invokeMethod<bool>('canScheduleExactAlarms');
+      return r ?? true;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  /// On Android 12+, opens the system screen to allow "Alarms & reminders". No-op on other platforms.
+  static Future<void> openExactAlarmSettings() async {
+    if (!Platform.isAndroid) return;
+    try {
+      await _exactAlarmChannel.invokeMethod<void>('openExactAlarmSettings');
+    } catch (_) {}
+  }
+
+  /// Schedules a one-off test alarm that rings after [fromNow]. Used to verify alarm flow.
+  /// Returns true if scheduled (Android only); on other platforms or on error returns false.
+  static Future<bool> scheduleTestAlarm(Duration fromNow) async {
+    if (!Platform.isAndroid) return false;
+    try {
+      final triggerAtMillis =
+          DateTime.now().add(fromNow).millisecondsSinceEpoch;
+      final scheduled = await _exactAlarmChannel.invokeMethod<bool>(
+        'scheduleTestAlarm',
+        {'timestampMillis': triggerAtMillis},
+      );
+      return scheduled == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Cancels the test alarm if one was scheduled. No-op on non-Android.
+  static Future<void> cancelTestAlarm() async {
+    if (!Platform.isAndroid) return;
+    try {
+      await _exactAlarmChannel.invokeMethod<void>('cancelTestAlarm');
+    } catch (_) {}
+  }
+
   /// Enable alarm for one prayer or disable all. Cancels previous and reschedules if enabling.
   Future<void> setEnabledPrayer(String? prayerName) async {
     final prefs = await SharedPreferences.getInstance();
     if (prayerName == null || prayerName.isEmpty) {
       await prefs.remove(_keyEnabledPrayer);
       await _cancelAll();
+      await _cancelNativeAlarm();
       return;
     }
     if (!prayerAlarmOptions.contains(prayerName)) return;
     await prefs.setString(_keyEnabledPrayer, prayerName);
     await _cancelAll();
+    await _cancelNativeAlarm();
     await _scheduleNext(prayerName);
+  }
+
+  /// Cancel native Android alarm (so phone alarm stops when user disables).
+  static Future<void> _cancelNativeAlarm() async {
+    if (!Platform.isAndroid) return;
+    try {
+      await _exactAlarmChannel.invokeMethod<void>('cancelPrayerAlarm');
+    } catch (_) {}
   }
 
   /// Cancel all prayer-related notifications (main and snooze).
@@ -94,6 +160,7 @@ class PrayerAlarmService {
   }
 
   /// Schedule the next occurrence for [prayerName]. If today's time has passed, schedule for tomorrow.
+  /// On Android uses native AlarmManager so the alarm actually rings on the device.
   Future<void> _scheduleNext(String prayerName) async {
     await ensureTimezoneInitialized();
     final coordinates = await getCoordinates();
@@ -115,13 +182,34 @@ class PrayerAlarmService {
     }
 
     final timeFormatted = DateFormat.jm().format(scheduledTime);
+    final triggerAtMillis = scheduledTime.millisecondsSinceEpoch;
+
+    // On Android: use native AlarmManager so alarm rings at exact time (even when app is closed).
+    if (Platform.isAndroid) {
+      try {
+        final scheduled = await _exactAlarmChannel.invokeMethod<bool>('schedulePrayerAlarm', {
+          'timestampMillis': triggerAtMillis,
+          'prayerName': prayerName,
+          'timeFormatted': timeFormatted,
+        });
+        if (scheduled == true) return;
+      } catch (_) {}
+    }
+
+    // Fallback: scheduled notification (iOS or if native scheduling failed).
     final payload = jsonEncode({
       payloadType: payloadTypePrayerAlarm,
       payloadPrayer: prayerName,
       payloadTime: timeFormatted,
     });
 
-    final tzDate = tz.TZDateTime.from(scheduledTime, tz.local);
+    final tz.TZDateTime tzDate;
+    if (_timezoneFallback) {
+      final instantMs = scheduledTime.millisecondsSinceEpoch;
+      tzDate = tz.TZDateTime.fromMillisecondsSinceEpoch(tz.UTC, instantMs);
+    } else {
+      tzDate = tz.TZDateTime.from(scheduledTime, tz.local);
+    }
     await _notificationsPlugin.zonedSchedule(
       id: prayerAlarmNotificationId,
       title: 'Prayer Time',
@@ -152,6 +240,8 @@ class PrayerAlarmService {
     switch (prayerName) {
       case 'Fajr':
         return prayerTimes.fajr;
+      case 'Sunrise':
+        return prayerTimes.sunrise;
       case 'Zuhr':
         return prayerTimes.dhuhr;
       case 'Asr':
@@ -170,6 +260,7 @@ class PrayerAlarmService {
     final enabled = await getEnabledPrayer();
     if (enabled == null || enabled.isEmpty) return;
     await _cancelAll();
+    await _cancelNativeAlarm();
     await _scheduleNext(enabled);
   }
 
@@ -177,7 +268,13 @@ class PrayerAlarmService {
   Future<void> scheduleSnooze(String prayerName, String timeFormatted) async {
     await _notificationsPlugin.cancel(id: snoozeNotificationId);
     await ensureTimezoneInitialized();
-    final when = tz.TZDateTime.now(tz.local).add(snoozeDuration);
+    final tz.TZDateTime when;
+    if (_timezoneFallback) {
+      final nowMs = DateTime.now().millisecondsSinceEpoch;
+      when = tz.TZDateTime.fromMillisecondsSinceEpoch(tz.UTC, nowMs).add(snoozeDuration);
+    } else {
+      when = tz.TZDateTime.now(tz.local).add(snoozeDuration);
+    }
     final payload = jsonEncode({
       payloadType: payloadTypePrayerAlarm,
       payloadPrayer: prayerName,
