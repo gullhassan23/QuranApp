@@ -1,5 +1,6 @@
 import 'package:app5/Global.dart';
 import 'package:app5/hadith/data/hadith_api_config.dart';
+import 'package:app5/hadith/data/hadith_display_prefs.dart';
 import 'package:app5/hadith/data/hadith_repository.dart';
 import 'package:app5/hadith/domain/hadith_models.dart';
 import 'package:app5/hadith/presentation/hadith_bookmarks_screen.dart';
@@ -8,6 +9,7 @@ import 'package:app5/hadith/presentation/hadith_themed_scaffold.dart';
 import 'package:app5/hadith/presentation/hadith_ui_tokens.dart';
 import 'package:app5/hadith/presentation/widgets/hadith_card.dart';
 import 'package:app5/hadith/presentation/widgets/hadith_secondary_card.dart';
+import 'package:app5/hadith/presentation/widgets/hadith_language_settings_sheet.dart';
 import 'package:app5/hadith/presentation/widgets/hadith_state_views.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -28,6 +30,7 @@ class _HadithBooksScreenState extends State<HadithBooksScreen> {
   @override
   void initState() {
     super.initState();
+    HadithDisplayPrefs.instance.ensureLoaded();
     if (HadithApiConfig.hasApiKey) {
       _hotdFuture = _repo.getHadithOfTheDay();
     }
@@ -58,6 +61,12 @@ class _HadithBooksScreenState extends State<HadithBooksScreen> {
         actions: [
           IconButton(
             color: textprimary,
+            tooltip: 'Languages',
+            onPressed: () => showHadithLanguageSettingsSheet(context),
+            icon: Icon(Icons.translate_outlined, color: textprimary),
+          ),
+          IconButton(
+            color: textprimary,
             tooltip: 'Bookmarks',
             onPressed: () {
               Navigator.of(context).push(
@@ -66,7 +75,7 @@ class _HadithBooksScreenState extends State<HadithBooksScreen> {
                 ),
               );
             },
-            icon: Icon(Icons.bookmarks_outlined, color: tokens.iconSoft),
+            icon: Icon(Icons.bookmarks_outlined, color: textprimary),
           ),
         ],
       ),
@@ -157,7 +166,10 @@ class _HadithBooksScreenState extends State<HadithBooksScreen> {
                 message: 'Could not load a hadith right now.',
               );
             }
-            return HadithCard(item: h);
+            return ValueListenableBuilder<HadithLanguageVisibility>(
+              valueListenable: HadithDisplayPrefs.instance.visibility,
+              builder: (_, vis, __) => HadithCard(item: h, visibility: vis),
+            );
           },
         ),
         const SizedBox(height: 20),

@@ -21,7 +21,7 @@ class _BottomWState extends State<BottomW> {
     PrayerScreen(),
     QuranScreen(),
     QariScreen(),
-    const HadithBooksScreen(),
+     HadithBooksScreen(),
   ];
   @override
   Widget build(BuildContext context) {
@@ -72,7 +72,12 @@ class _BottomWState extends State<BottomW> {
               label: "Quran",
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.menu_book_outlined, size: 28),
+              icon: Image.asset(
+                color: Colors.brown,
+                "assets/images/hadithicon.png",
+                height: 30,
+                width: 50,
+              ),
               label: "Hadith",
             ),
           ],

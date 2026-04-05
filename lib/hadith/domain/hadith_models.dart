@@ -37,8 +37,11 @@ class HadithItem {
     this.hadithArabic,
     this.hadithEnglish,
     this.englishNarrator,
+    this.hadithUrdu,
+    this.urduNarrator,
     this.status,
     this.headingEnglish,
+    this.headingUrdu,
   });
 
   final int apiId;
@@ -50,10 +53,47 @@ class HadithItem {
   final String? hadithArabic;
   final String? hadithEnglish;
   final String? englishNarrator;
+  final String? hadithUrdu;
+  final String? urduNarrator;
   final String? status;
   final String? headingEnglish;
+  final String? headingUrdu;
 
   String get bookmarkKey => '$bookSlug|$chapterNumber|$hadithNumber';
+
+  HadithItem copyWith({
+    int? apiId,
+    String? hadithNumber,
+    String? bookSlug,
+    String? chapterNumber,
+    String? bookName,
+    String? chapterEnglish,
+    String? hadithArabic,
+    String? hadithEnglish,
+    String? englishNarrator,
+    String? hadithUrdu,
+    String? urduNarrator,
+    String? status,
+    String? headingEnglish,
+    String? headingUrdu,
+  }) {
+    return HadithItem(
+      apiId: apiId ?? this.apiId,
+      hadithNumber: hadithNumber ?? this.hadithNumber,
+      bookSlug: bookSlug ?? this.bookSlug,
+      chapterNumber: chapterNumber ?? this.chapterNumber,
+      bookName: bookName ?? this.bookName,
+      chapterEnglish: chapterEnglish ?? this.chapterEnglish,
+      hadithArabic: hadithArabic ?? this.hadithArabic,
+      hadithEnglish: hadithEnglish ?? this.hadithEnglish,
+      englishNarrator: englishNarrator ?? this.englishNarrator,
+      hadithUrdu: hadithUrdu ?? this.hadithUrdu,
+      urduNarrator: urduNarrator ?? this.urduNarrator,
+      status: status ?? this.status,
+      headingEnglish: headingEnglish ?? this.headingEnglish,
+      headingUrdu: headingUrdu ?? this.headingUrdu,
+    );
+  }
 }
 
 class HadithPage {

@@ -1,3 +1,4 @@
+import 'package:app5/hadith/data/hadith_display_prefs.dart';
 import 'package:app5/hadith/domain/hadith_models.dart';
 import 'package:app5/hadith/presentation/hadith_ui_tokens.dart';
 import 'package:flutter/material.dart';
@@ -10,12 +11,16 @@ class HadithCard extends StatelessWidget {
     this.onTap,
     this.trailing,
     this.arabicFontSize = 19,
+    this.urduFontSize = 15,
+    this.visibility = HadithLanguageVisibility.all,
   });
 
   final HadithItem item;
   final VoidCallback? onTap;
   final Widget? trailing;
   final double arabicFontSize;
+  final double urduFontSize;
+  final HadithLanguageVisibility visibility;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +51,8 @@ class HadithCard extends StatelessWidget {
               if (trailing != null) trailing!,
             ],
           ),
-          if (item.headingEnglish != null &&
+          if (visibility.showEnglish &&
+              item.headingEnglish != null &&
               item.headingEnglish!.trim().isNotEmpty) ...[
             const SizedBox(height: 12),
             Text(
@@ -60,7 +66,24 @@ class HadithCard extends StatelessWidget {
               ),
             ),
           ],
-          if (item.hadithArabic != null &&
+          if (visibility.showUrdu &&
+              item.headingUrdu != null &&
+              item.headingUrdu!.trim().isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              item.headingUrdu!,
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.right,
+              style: GoogleFonts.notoNastaliqUrdu(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                height: 1.5,
+                color: tokens.isWarm ? tokens.englishText : tokens.sectionTitle,
+              ),
+            ),
+          ],
+          if (visibility.showArabic &&
+              item.hadithArabic != null &&
               item.hadithArabic!.trim().isNotEmpty) ...[
             const SizedBox(height: 12),
             Text(
@@ -74,7 +97,8 @@ class HadithCard extends StatelessWidget {
               ),
             ),
           ],
-          if (item.englishNarrator != null &&
+          if (visibility.showEnglish &&
+              item.englishNarrator != null &&
               item.englishNarrator!.trim().isNotEmpty) ...[
             const SizedBox(height: 10),
             Text(
@@ -87,7 +111,8 @@ class HadithCard extends StatelessWidget {
               ),
             ),
           ],
-          if (item.hadithEnglish != null &&
+          if (visibility.showEnglish &&
+              item.hadithEnglish != null &&
               item.hadithEnglish!.trim().isNotEmpty) ...[
             const SizedBox(height: 10),
             Text(
@@ -95,6 +120,37 @@ class HadithCard extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 13,
                 height: 1.55,
+                color: tokens.englishText,
+              ),
+            ),
+          ],
+          if (visibility.showUrdu &&
+              item.urduNarrator != null &&
+              item.urduNarrator!.trim().isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              item.urduNarrator!,
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.right,
+              style: GoogleFonts.notoNastaliqUrdu(
+                fontSize: 12.5,
+                fontStyle: FontStyle.italic,
+                height: 1.55,
+                color: tokens.englishMuted,
+              ),
+            ),
+          ],
+          if (visibility.showUrdu &&
+              item.hadithUrdu != null &&
+              item.hadithUrdu!.trim().isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              item.hadithUrdu!,
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.right,
+              style: GoogleFonts.notoNastaliqUrdu(
+                fontSize: urduFontSize,
+                height: 1.75,
                 color: tokens.englishText,
               ),
             ),

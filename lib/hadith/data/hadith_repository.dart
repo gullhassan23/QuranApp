@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:app5/hadith/data/hadith_api_config.dart';
 import 'package:app5/hadith/data/hadith_api_client.dart';
 import 'package:app5/hadith/data/hadith_catalog.dart';
+import 'package:app5/hadith/data/hadith_urdu_cdn_client.dart';
 import 'package:app5/hadith/domain/hadith_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -46,10 +47,11 @@ class HadithRepository {
     int paginate,
     String? en,
     String? ar,
+    String? ur,
     String? status,
     String? hadithNumber,
   ) =>
-      'hadith|$book|$chapter|$page|$paginate|${en ?? ''}|${ar ?? ''}|${status ?? ''}|${hadithNumber ?? ''}';
+      'hadith|$book|$chapter|$page|$paginate|${en ?? ''}|${ar ?? ''}|${ur ?? ''}|${status ?? ''}|${hadithNumber ?? ''}';
 
   Future<List<HadithChapter>> getChapters(String bookSlug) async {
     final key = _chaptersKey(bookSlug);
@@ -67,6 +69,7 @@ class HadithRepository {
     int paginate = 20,
     String? hadithEnglish,
     String? hadithArabic,
+    String? hadithUrdu,
     String? status,
     String? hadithNumber,
     bool bypassCache = false,
@@ -78,6 +81,7 @@ class HadithRepository {
       paginate,
       hadithEnglish,
       hadithArabic,
+      hadithUrdu,
       status,
       hadithNumber,
     );
@@ -92,6 +96,7 @@ class HadithRepository {
       paginate: paginate,
       hadithEnglish: hadithEnglish,
       hadithArabic: hadithArabic,
+      hadithUrdu: hadithUrdu,
       status: status,
       hadithNumber: hadithNumber,
     );
@@ -112,6 +117,17 @@ class HadithRepository {
       if (h.hadithNumber == b.hadithNumber) return h;
     }
     return page.items.isNotEmpty ? page.items.first : null;
+  }
+
+  /// Fills [hadithUrdu] from CDN when the API left it empty (supported books only).
+  Future<HadithItem> enrichWithCdnUrduIfNeeded(HadithItem item) async {
+    if ((item.hadithUrdu ?? '').trim().isNotEmpty) return item;
+    final text = await HadithUrduCdnClient.instance.fetchUrduBody(
+      bookSlug: item.bookSlug,
+      hadithNumber: item.hadithNumber,
+    );
+    if (text == null || text.trim().isEmpty) return item;
+    return item.copyWith(hadithUrdu: text.trim());
   }
 
   Future<void> saveLastRead({
@@ -221,8 +237,11 @@ class HadithRepository {
         'hadithArabic': h.hadithArabic,
         'hadithEnglish': h.hadithEnglish,
         'englishNarrator': h.englishNarrator,
+        'hadithUrdu': h.hadithUrdu,
+        'urduNarrator': h.urduNarrator,
         'status': h.status,
         'headingEnglish': h.headingEnglish,
+        'headingUrdu': h.headingUrdu,
       };
 
   HadithItem? _itemFromHotdCache(Map<String, dynamic> m) {
@@ -238,8 +257,11 @@ class HadithRepository {
       hadithArabic: m['hadithArabic']?.toString(),
       hadithEnglish: m['hadithEnglish']?.toString(),
       englishNarrator: m['englishNarrator']?.toString(),
+      hadithUrdu: m['hadithUrdu']?.toString(),
+      urduNarrator: m['urduNarrator']?.toString(),
       status: m['status']?.toString(),
       headingEnglish: m['headingEnglish']?.toString(),
+      headingUrdu: m['headingUrdu']?.toString(),
     );
   }
 

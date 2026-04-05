@@ -54,6 +54,7 @@ class HadithApiClient {
     int paginate = 20,
     String? hadithEnglish,
     String? hadithArabic,
+    String? hadithUrdu,
     String? status,
     String? hadithNumber,
   }) async {
@@ -70,6 +71,9 @@ class HadithApiClient {
     }
     if (hadithArabic != null && hadithArabic.trim().isNotEmpty) {
       q['hadithArabic'] = hadithArabic.trim();
+    }
+    if (hadithUrdu != null && hadithUrdu.trim().isNotEmpty) {
+      q['hadithUrdu'] = hadithUrdu.trim();
     }
     if (status != null && status.trim().isNotEmpty) {
       q['status'] = status.trim();

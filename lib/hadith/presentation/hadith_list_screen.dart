@@ -1,12 +1,17 @@
+import 'package:app5/Global.dart';
+import 'package:app5/hadith/data/hadith_display_prefs.dart';
 import 'package:app5/hadith/data/hadith_repository.dart';
 import 'package:app5/hadith/domain/hadith_models.dart';
 import 'package:app5/hadith/presentation/hadith_detail_screen.dart';
 import 'package:app5/hadith/presentation/hadith_themed_scaffold.dart';
 import 'package:app5/hadith/presentation/hadith_ui_tokens.dart';
 import 'package:app5/hadith/presentation/widgets/hadith_card.dart';
+import 'package:app5/hadith/presentation/widgets/hadith_language_settings_sheet.dart';
 import 'package:app5/hadith/presentation/widgets/hadith_state_views.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+enum HadithSearchLanguage { english, urdu, arabic }
 
 class HadithListScreen extends StatefulWidget {
   const HadithListScreen({
@@ -36,10 +41,12 @@ class _HadithListScreenState extends State<HadithListScreen> {
   String? _error;
   static const _perPage = 20;
   String _searchQuery = '';
+  HadithSearchLanguage _searchLang = HadithSearchLanguage.english;
 
   @override
   void initState() {
     super.initState();
+    HadithDisplayPrefs.instance.ensureLoaded();
     _scroll.addListener(_onScroll);
     _load(reset: true);
     _repo.saveLastRead(
@@ -77,12 +84,15 @@ class _HadithListScreenState extends State<HadithListScreen> {
       });
     }
     try {
+      final q = _searchQuery.isEmpty ? null : _searchQuery;
       final page = await _repo.getHadithPage(
         bookSlug: widget.bookSlug,
         chapterNumber: widget.chapter.chapterNumber,
         page: 1,
         paginate: _perPage,
-        hadithEnglish: _searchQuery.isEmpty ? null : _searchQuery,
+        hadithEnglish: _searchLang == HadithSearchLanguage.english ? q : null,
+        hadithUrdu: _searchLang == HadithSearchLanguage.urdu ? q : null,
+        hadithArabic: _searchLang == HadithSearchLanguage.arabic ? q : null,
         bypassCache: reset,
       );
       if (!mounted) return;
@@ -109,12 +119,15 @@ class _HadithListScreenState extends State<HadithListScreen> {
     setState(() => _loadingMore = true);
     try {
       final next = _page + 1;
+      final q = _searchQuery.isEmpty ? null : _searchQuery;
       final page = await _repo.getHadithPage(
         bookSlug: widget.bookSlug,
         chapterNumber: widget.chapter.chapterNumber,
         page: next,
         paginate: _perPage,
-        hadithEnglish: _searchQuery.isEmpty ? null : _searchQuery,
+        hadithEnglish: _searchLang == HadithSearchLanguage.english ? q : null,
+        hadithUrdu: _searchLang == HadithSearchLanguage.urdu ? q : null,
+        hadithArabic: _searchLang == HadithSearchLanguage.arabic ? q : null,
         bypassCache: true,
       );
       if (!mounted) return;
@@ -137,55 +150,101 @@ class _HadithListScreenState extends State<HadithListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+
     final tokens = HadithUiTokens.of(context);
     return HadithThemedScaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.brown),
+        backgroundColor: backgroundColor,
         title: Text(
           widget.chapter.chapterEnglish,
           style: GoogleFonts.playfairDisplay(
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-            color: tokens.appBarForeground,
-          ),
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
+              // color: tokens.appBarForeground,
+              color: textprimary),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Languages',
+            icon: Icon(Icons.translate_outlined, color: textprimary),
+            onPressed: () => showHadithLanguageSettingsSheet(context),
+          ),
+        ],
       ),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: TextField(
-              controller: _searchController,
-              onSubmitted: (_) => _submitSearch(),
-              style: GoogleFonts.poppins(
-                color: tokens.isWarm ? tokens.sectionTitle : cs.onSurface,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Search English text…',
-                hintStyle: GoogleFonts.poppins(
-                  color: tokens.isWarm ? tokens.iconSoft : cs.onSurfaceVariant,
-                ),
-                prefixIcon: Icon(Icons.search, color: tokens.iconSoft),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    Icons.clear,
-                    color: tokens.iconSoft,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SegmentedButton<HadithSearchLanguage>(
+                  style: ButtonStyle(
+                    foregroundColor:
+                        MaterialStateProperty.resolveWith<Color>((states) {
+                      if (states.contains(MaterialState.selected)) {
+                        return Colors.white; // selected tab text
+                      }
+                      return Colors
+                          .black; // ❗ unselected tab text (your requirement)
+                    }),
                   ),
-                  onPressed: () {
-                    _searchController.clear();
-                    if (_searchQuery.isNotEmpty) {
-                      _searchQuery = '';
-                      _load(reset: true);
-                    }
+                  segments: const [
+                    ButtonSegment(
+                      value: HadithSearchLanguage.english,
+                      label: Text('EN'),
+                    ),
+                    ButtonSegment(
+                      value: HadithSearchLanguage.urdu,
+                      label: Text('UR'),
+                    ),
+                    ButtonSegment(
+                      value: HadithSearchLanguage.arabic,
+                      label: Text('AR'),
+                    ),
+                  ],
+                  selected: {_searchLang},
+                  onSelectionChanged: (s) {
+                    setState(() => _searchLang = s.first);
+                    if (_searchQuery.isNotEmpty) _load(reset: true);
                   },
                 ),
-                filled: true,
-                fillColor: tokens.inputFill,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _searchController,
+                  onSubmitted: (_) => _submitSearch(),
+                  style: GoogleFonts.poppins(
+                      // color: tokens.isWarm ? tokens.sectionTitle : cs.onSurface,
+                      color: Colors.black),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: containercolor, // 👈 change bg color here
+
+                    hintText: switch (_searchLang) {
+                      HadithSearchLanguage.english => 'Search English text…',
+                      HadithSearchLanguage.urdu => 'Search Urdu text…',
+                      HadithSearchLanguage.arabic => 'Search Arabic text…',
+                    },
+                    hintStyle: GoogleFonts.poppins(color: textprimary),
+                    prefixIcon: Icon(Icons.search, color: tokens.iconSoft),
+                    suffixIcon: IconButton(
+                      icon: Icon(Icons.clear, color: tokens.iconSoft),
+                      onPressed: () {
+                        _searchController.clear();
+                        if (_searchQuery.isNotEmpty) {
+                          _searchQuery = '';
+                          _load(reset: true);
+                        }
+                      },
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
           Expanded(
@@ -203,32 +262,41 @@ class _HadithListScreenState extends State<HadithListScreen> {
                                 : 'No results for your search.',
                             icon: Icons.search_off_outlined,
                           )
-                        : ListView.separated(
-                            controller: _scroll,
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                            itemCount: _items.length + (_loadingMore ? 1 : 0),
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(height: 12),
-                            itemBuilder: (context, i) {
-                              if (i >= _items.length) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Center(
-                                    child: CircularProgressIndicator(
-                                      color: tokens.progressColor,
-                                    ),
-                                  ),
-                                );
-                              }
-                              final item = _items[i];
-                              return HadithCard(
-                                item: item,
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute<void>(
-                                      builder: (_) =>
-                                          HadithDetailScreen(item: item),
-                                    ),
+                        : ValueListenableBuilder<HadithLanguageVisibility>(
+                            valueListenable:
+                                HadithDisplayPrefs.instance.visibility,
+                            builder: (context, vis, _) {
+                              return ListView.separated(
+                                controller: _scroll,
+                                padding:
+                                    const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                                itemCount:
+                                    _items.length + (_loadingMore ? 1 : 0),
+                                separatorBuilder: (_, __) =>
+                                    const SizedBox(height: 12),
+                                itemBuilder: (context, i) {
+                                  if (i >= _items.length) {
+                                    return Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                          color: Colors.brown,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  final item = _items[i];
+                                  return HadithCard(
+                                    item: item,
+                                    visibility: vis,
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute<void>(
+                                          builder: (_) =>
+                                              HadithDetailScreen(item: item),
+                                        ),
+                                      );
+                                    },
                                   );
                                 },
                               );

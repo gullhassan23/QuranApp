@@ -18,13 +18,14 @@ class _JuzScreenState extends State<JuzScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-          
       body: FutureBuilder<JuzModel>(
         future: apiServices.getJuzz(Constants.juzIndex!),
         builder: (context, AsyncSnapshot<JuzModel> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
-              child: CircularProgressIndicator(color: Colors.brown,),
+              child: CircularProgressIndicator(
+                color: Colors.brown,
+              ),
             );
           } else if (snapshot.hasData) {
             print('${snapshot.data!.juzAyahs.length}');

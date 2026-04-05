@@ -1,3 +1,4 @@
+import 'package:app5/Global.dart';
 import 'package:app5/hadith/data/hadith_repository.dart';
 import 'package:app5/hadith/domain/hadith_models.dart';
 import 'package:app5/hadith/presentation/hadith_list_screen.dart';
@@ -42,12 +43,14 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
     final tokens = HadithUiTokens.of(context);
     return HadithThemedScaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.brown),
+        backgroundColor: backgroundColor,
         title: Text(
           widget.bookTitle,
           style: GoogleFonts.playfairDisplay(
-            fontWeight: FontWeight.w600,
-            color: tokens.appBarForeground,
-          ),
+              fontWeight: FontWeight.w600,
+              // color: tokens.appBarForeground,
+              color: textprimary),
         ),
       ),
       body: FutureBuilder<List<HadithChapter>>(
@@ -79,37 +82,34 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                     c.chapterEnglish,
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.w600,
-                      color: tokens.isWarm
-                          ? tokens.sectionTitle
-                          : cs.onSurface,
+                      color: tokens.isWarm ? tokens.sectionTitle : cs.onSurface,
                     ),
                   ),
-                  subtitle: c.chapterArabic != null &&
-                          c.chapterArabic!.isNotEmpty
-                      ? Text(
-                          c.chapterArabic!,
-                          textDirection: TextDirection.rtl,
-                          textAlign: TextAlign.right,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.amiri(
-                            fontSize: 16,
-                            color: tokens.isWarm
-                                ? tokens.iconSoft
-                                : cs.onSurfaceVariant,
-                          ),
-                        )
-                      : Text(
-                          'Chapter ${c.chapterNumber}',
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            color: tokens.isWarm
-                                ? tokens.iconSoft
-                                : cs.onSurfaceVariant,
-                          ),
-                        ),
-                  trailing:
-                      Icon(Icons.chevron_right, color: tokens.iconSoft),
+                  subtitle:
+                      c.chapterArabic != null && c.chapterArabic!.isNotEmpty
+                          ? Text(
+                              c.chapterArabic!,
+                              textDirection: TextDirection.rtl,
+                              textAlign: TextAlign.right,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.amiri(
+                                fontSize: 16,
+                                color: tokens.isWarm
+                                    ? tokens.iconSoft
+                                    : cs.onSurfaceVariant,
+                              ),
+                            )
+                          : Text(
+                              'Chapter ${c.chapterNumber}',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: tokens.isWarm
+                                    ? tokens.iconSoft
+                                    : cs.onSurfaceVariant,
+                              ),
+                            ),
+                  trailing: Icon(Icons.chevron_right, color: tokens.iconSoft),
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(

@@ -1,8 +1,10 @@
+import 'package:app5/hadith/data/hadith_display_prefs.dart';
 import 'package:app5/hadith/data/hadith_repository.dart';
 import 'package:app5/hadith/domain/hadith_models.dart';
 import 'package:app5/hadith/presentation/hadith_detail_screen.dart';
 import 'package:app5/hadith/presentation/hadith_themed_scaffold.dart';
 import 'package:app5/hadith/presentation/hadith_ui_tokens.dart';
+import 'package:app5/hadith/presentation/widgets/hadith_language_settings_sheet.dart';
 import 'package:app5/hadith/presentation/widgets/hadith_secondary_card.dart';
 import 'package:app5/hadith/presentation/widgets/hadith_state_views.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +24,7 @@ class _HadithBookmarksScreenState extends State<HadithBookmarksScreen> {
   @override
   void initState() {
     super.initState();
+    HadithDisplayPrefs.instance.ensureLoaded();
     _future = _repo.loadBookmarks();
   }
 
@@ -42,6 +45,13 @@ class _HadithBookmarksScreenState extends State<HadithBookmarksScreen> {
             color: tokens.appBarForeground,
           ),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Languages',
+            icon: Icon(Icons.translate_outlined, color: tokens.iconSoft),
+            onPressed: () => showHadithLanguageSettingsSheet(context),
+          ),
+        ],
       ),
       body: FutureBuilder<List<HadithBookmark>>(
         future: _future,

@@ -94,6 +94,7 @@ class _AudioScreenState extends State<AudioScreen> {
       backgroundColor: backgroundColor,
       appBar: AppBar(
         elevation: 0,
+        iconTheme: IconThemeData(color: Colors.brown),
         backgroundColor: backgroundColor,
         automaticallyImplyLeading: true,
         title: Text(

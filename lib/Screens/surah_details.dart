@@ -40,6 +40,7 @@ class _SurahDetailsState extends State<SurahDetails> {
             return Scaffold(
               backgroundColor: backgroundColor,
               appBar: AppBar(
+                  iconTheme: IconThemeData(color: Colors.brown),
                   surfaceTintColor: backgroundColor,
                   backgroundColor: backgroundColor,
                   title: Text(
@@ -105,6 +106,7 @@ class _SurahDetailsState extends State<SurahDetails> {
         style: TextStyle(color: textprimary, fontSize: 20),
       ),
       leading: Radio<Translation>(
+        activeColor: Colors.brown,
         value: value,
         groupValue: _translation,
         onChanged: (Translation? val) {

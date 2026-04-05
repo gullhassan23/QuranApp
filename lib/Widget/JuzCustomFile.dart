@@ -21,7 +21,7 @@ class JuzCustomTile extends StatelessWidget {
         children: [
           Text(
             list[index].ayahNumber.toString(),
-            style: TextStyle(fontSize: 15),
+            style: TextStyle(fontSize: 15, color: Colors.brown),
           ),
           Text(
             list[index].ayahsText.toString(),
@@ -31,11 +31,11 @@ class JuzCustomTile extends StatelessWidget {
           ),
           Text(
             list[index].ayahNumber.toString(),
-            style: TextStyle(fontSize: 15),
+            style: TextStyle(fontSize: 15, color: Colors.brown),
           ),
           Text(
             list[index].surahName.toString(),
-            style: TextStyle(fontSize: 21),
+            style: TextStyle(fontSize: 21, color: Colors.brown),
           )
         ],
       ),

@@ -84,8 +84,11 @@ class HadithDto {
       hadithArabic: e['hadithArabic']?.toString(),
       hadithEnglish: e['hadithEnglish']?.toString(),
       englishNarrator: e['englishNarrator']?.toString(),
+      hadithUrdu: e['hadithUrdu']?.toString(),
+      urduNarrator: e['urduNarrator']?.toString(),
       status: e['status']?.toString(),
       headingEnglish: e['headingEnglish']?.toString(),
+      headingUrdu: e['headingUrdu']?.toString(),
     );
   }
 

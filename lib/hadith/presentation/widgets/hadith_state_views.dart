@@ -14,7 +14,7 @@ class HadithLoadingView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: tokens.progressColor),
+          CircularProgressIndicator(  color: Colors.brown,),
           if (message != null) ...[
             const SizedBox(height: 16),
             Text(
