@@ -158,3 +158,126 @@ class HadithBookmark {
     );
   }
 }
+
+/// Local reading position for "Continue reading" (recents list in SharedPreferences).
+class HadithReadingProgress {
+  const HadithReadingProgress({
+    required this.bookSlug,
+    required this.bookName,
+    required this.chapterNumber,
+    required this.chapterEnglish,
+    required this.hadithNumber,
+    required this.scrollOffset,
+    required this.updatedAtMs,
+    this.apiId,
+  });
+
+  final String bookSlug;
+  final String bookName;
+  final String chapterNumber;
+  final String chapterEnglish;
+  final String hadithNumber;
+  final double scrollOffset;
+  final int updatedAtMs;
+  final int? apiId;
+
+  /// Same shape as [HadithItem.bookmarkKey] / [HadithBookmark.key].
+  String get progressKey => '$bookSlug|$chapterNumber|$hadithNumber';
+
+  Map<String, dynamic> toJson() => {
+        'bookSlug': bookSlug,
+        'bookName': bookName,
+        'chapterNumber': chapterNumber,
+        'chapterEnglish': chapterEnglish,
+        'hadithNumber': hadithNumber,
+        'scrollOffset': scrollOffset,
+        'updatedAtMs': updatedAtMs,
+        if (apiId != null) 'apiId': apiId,
+      };
+
+  static HadithReadingProgress? fromJson(Map<String, dynamic>? m) {
+    if (m == null) return null;
+    final slug = m['bookSlug'] as String?;
+    final bookName = m['bookName'] as String?;
+    final ch = m['chapterNumber'] as String?;
+    final hadithNumStr = m['hadithNumber'] as String?;
+    if (slug == null || bookName == null || ch == null || hadithNumStr == null) {
+      return null;
+    }
+    final chEn = m['chapterEnglish'] as String? ?? '';
+    final offsetRaw = m['scrollOffset'];
+    final double offset;
+    if (offsetRaw is num) {
+      offset = offsetRaw.toDouble();
+    } else {
+      return null;
+    }
+    final updatedRaw = m['updatedAtMs'];
+    final int updatedAt;
+    if (updatedRaw is int) {
+      updatedAt = updatedRaw;
+    } else if (updatedRaw is num) {
+      updatedAt = updatedRaw.toInt();
+    } else {
+      return null;
+    }
+    final apiRaw = m['apiId'];
+    final int? apiId;
+    if (apiRaw is int) {
+      apiId = apiRaw;
+    } else if (apiRaw is num) {
+      apiId = apiRaw.toInt();
+    } else {
+      apiId = null;
+    }
+    return HadithReadingProgress(
+      bookSlug: slug,
+      bookName: bookName,
+      chapterNumber: ch,
+      chapterEnglish: chEn,
+      hadithNumber: hadithNumStr,
+      scrollOffset: offset.isFinite ? offset : 0,
+      updatedAtMs: updatedAt,
+      apiId: apiId,
+    );
+  }
+
+  HadithReadingProgress copyWith({
+    String? bookSlug,
+    String? bookName,
+    String? chapterNumber,
+    String? chapterEnglish,
+    String? hadithNumber,
+    double? scrollOffset,
+    int? updatedAtMs,
+    int? apiId,
+  }) {
+    return HadithReadingProgress(
+      bookSlug: bookSlug ?? this.bookSlug,
+      bookName: bookName ?? this.bookName,
+      chapterNumber: chapterNumber ?? this.chapterNumber,
+      chapterEnglish: chapterEnglish ?? this.chapterEnglish,
+      hadithNumber: hadithNumber ?? this.hadithNumber,
+      scrollOffset: scrollOffset ?? this.scrollOffset,
+      updatedAtMs: updatedAtMs ?? this.updatedAtMs,
+      apiId: apiId ?? this.apiId,
+    );
+  }
+
+  /// Build from a loaded [HadithItem] and current scroll offset.
+  factory HadithReadingProgress.fromItem({
+    required HadithItem item,
+    required double scrollOffset,
+  }) {
+    return HadithReadingProgress(
+      bookSlug: item.bookSlug,
+      bookName: item.bookName,
+      chapterNumber: item.chapterNumber,
+      chapterEnglish: item.chapterEnglish,
+      hadithNumber: item.hadithNumber,
+      scrollOffset: scrollOffset.isFinite ? scrollOffset : 0,
+      updatedAtMs: DateTime.now().millisecondsSinceEpoch,
+      apiId: item.apiId,
+    );
+  }
+}

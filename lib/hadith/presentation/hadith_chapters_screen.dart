@@ -14,10 +14,14 @@ class HadithChaptersScreen extends StatefulWidget {
     super.key,
     required this.bookSlug,
     required this.bookTitle,
+    this.resumeIntent,
   });
 
   final String bookSlug;
   final String bookTitle;
+
+  /// When set (e.g. from Continue reading), opens the matching chapter list and resumes the hadith.
+  final HadithReadingProgress? resumeIntent;
 
   @override
   State<HadithChaptersScreen> createState() => _HadithChaptersScreenState();
@@ -26,6 +30,7 @@ class HadithChaptersScreen extends StatefulWidget {
 class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
   final _repo = hadithRepository;
   late Future<List<HadithChapter>> _future;
+  bool _autoResumeScheduled = false;
 
   @override
   void initState() {
@@ -68,6 +73,43 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
           final list = snap.data ?? [];
           if (list.isEmpty) {
             return const HadithEmptyView(message: 'No chapters found.');
+          }
+          final resume = widget.resumeIntent;
+          if (resume != null &&
+              resume.bookSlug == widget.bookSlug &&
+              !_autoResumeScheduled) {
+            _autoResumeScheduled = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              HadithChapter? match;
+              for (final c in list) {
+                if (c.chapterNumber == resume.chapterNumber) {
+                  match = c;
+                  break;
+                }
+              }
+              if (match != null) {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => HadithListScreen(
+                      bookSlug: widget.bookSlug,
+                      bookTitle: widget.bookTitle,
+                      chapter: match!,
+                      resume: resume,
+                    ),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Saved chapter not found. Open a chapter from the list.',
+                      style: GoogleFonts.poppins(),
+                    ),
+                  ),
+                );
+              }
+            });
           }
           return ListView.separated(
             padding: const EdgeInsets.all(16),

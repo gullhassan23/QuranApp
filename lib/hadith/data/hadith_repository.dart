@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:app5/hadith/data/hadith_api_config.dart';
 import 'package:app5/hadith/data/hadith_api_client.dart';
 import 'package:app5/hadith/data/hadith_catalog.dart';
+import 'package:app5/hadith/data/hadith_reading_progress_store.dart';
 import 'package:app5/hadith/data/hadith_urdu_cdn_client.dart';
 import 'package:app5/hadith/domain/hadith_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -118,6 +119,36 @@ class HadithRepository {
     }
     return page.items.isNotEmpty ? page.items.first : null;
   }
+
+  /// Exact match only (no fallback to another hadith) — for resume / continue reading.
+  Future<HadithItem?> fetchHadithForReadingProgress(
+    HadithReadingProgress p,
+  ) async {
+    final page = await getHadithPage(
+      bookSlug: p.bookSlug,
+      chapterNumber: p.chapterNumber,
+      page: 1,
+      paginate: 10,
+      hadithNumber: p.hadithNumber,
+      bypassCache: true,
+    );
+    for (final h in page.items) {
+      if (h.hadithNumber == p.hadithNumber) return h;
+    }
+    return null;
+  }
+
+  Future<List<HadithReadingProgress>> loadContinueReadingRecents() =>
+      HadithReadingProgressStore.instance.loadRecents();
+
+  Future<void> saveContinueReadingProgress(HadithReadingProgress p) =>
+      HadithReadingProgressStore.instance.upsertProgress(p);
+
+  Future<void> removeContinueReadingProgress(String progressKey) =>
+      HadithReadingProgressStore.instance.removeProgress(progressKey);
+
+  Future<void> clearContinueReadingProgress() =>
+      HadithReadingProgressStore.instance.clearAll();
 
   /// Fills [hadithUrdu] from CDN when the API left it empty (supported books only).
   Future<HadithItem> enrichWithCdnUrduIfNeeded(HadithItem item) async {

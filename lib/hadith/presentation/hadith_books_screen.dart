@@ -24,8 +24,7 @@ class HadithBooksScreen extends StatefulWidget {
 class _HadithBooksScreenState extends State<HadithBooksScreen> {
   final _repo = hadithRepository;
   Future<HadithItem?>? _hotdFuture;
-  Future<({String slug, String chapter, String bookName, String chapterEn})?>?
-      _lastReadFuture;
+  Future<List<HadithReadingProgress>>? _recentsFuture;
 
   @override
   void initState() {
@@ -34,7 +33,7 @@ class _HadithBooksScreenState extends State<HadithBooksScreen> {
     if (HadithApiConfig.hasApiKey) {
       _hotdFuture = _repo.getHadithOfTheDay();
     }
-    _lastReadFuture = _repo.loadLastRead();
+    _recentsFuture = _repo.loadContinueReadingRecents();
   }
 
   void _refreshHotd() {
@@ -85,21 +84,17 @@ class _HadithBooksScreenState extends State<HadithBooksScreen> {
               color: tokens.progressColor,
               onRefresh: () async {
                 _refreshHotd();
-                setState(() => _lastReadFuture = _repo.loadLastRead());
+                setState(
+                  () => _recentsFuture = _repo.loadContinueReadingRecents(),
+                );
                 await _hotdFuture;
+                await _recentsFuture;
               },
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 children: [
                   _hotdSection(context),
-                  FutureBuilder(
-                    future: _lastReadFuture,
-                    builder: (context, snap) {
-                      final data = snap.data;
-                      if (data == null) return const SizedBox.shrink();
-                      return _continueCard(context, data);
-                    },
-                  ),
+                  _continueReadingSection(context),
                   const SizedBox(height: 8),
                   Text(
                     'Collections',
@@ -177,71 +172,102 @@ class _HadithBooksScreenState extends State<HadithBooksScreen> {
     );
   }
 
-  Widget _continueCard(
+  Widget _continueReadingSection(BuildContext context) {
+    return FutureBuilder<List<HadithReadingProgress>>(
+      future: _recentsFuture,
+      builder: (context, snap) {
+        if (snap.connectionState != ConnectionState.done) {
+          return const SizedBox.shrink();
+        }
+        final list = snap.data ?? [];
+        if (list.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Continue reading',
+              style: TextStyle(
+                color: textprimary,
+                fontSize: 27,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _continueProgressCard(context, list.first, compact: false),
+            ...list.skip(1).map(
+                  (p) => Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: _continueProgressCard(context, p, compact: true),
+                  ),
+                ),
+            const SizedBox(height: 20),
+          ],
+        );
+      },
+    );
+  }
+
+  String _progressSubtitle(HadithReadingProgress p) {
+    final ch = p.chapterEnglish.isNotEmpty
+        ? p.chapterEnglish
+        : 'Chapter ${p.chapterNumber}';
+    return '${p.bookName} · $ch · #${p.hadithNumber}';
+  }
+
+  void _openContinue(HadithReadingProgress p) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => HadithChaptersScreen(
+          bookSlug: p.bookSlug,
+          bookTitle: p.bookName,
+          resumeIntent: p,
+        ),
+      ),
+    );
+  }
+
+  Widget _continueProgressCard(
     BuildContext context,
-    ({String slug, String chapter, String bookName, String chapterEn}) data,
-  ) {
+    HadithReadingProgress p, {
+    required bool compact,
+  }) {
     final cs = Theme.of(context).colorScheme;
     final tokens = HadithUiTokens.of(context);
-    void go() {
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => HadithChaptersScreen(
-            bookSlug: data.slug,
-            bookTitle: data.bookName,
-          ),
-        ),
-      );
-    }
-
-    final subtitle =
-        '${data.bookName} · ${data.chapterEn.isNotEmpty ? data.chapterEn : 'Chapter ${data.chapter}'}';
+    final subtitle = _progressSubtitle(p);
 
     if (!tokens.isWarm) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 20),
-        child: Card(
-          elevation: 0,
-          color: tokens.cardContainerColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(tokens.cardBorderRadius),
-          ),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(tokens.cardBorderRadius),
-            onTap: go,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Icon(Icons.history_edu_outlined, color: cs.primary, size: 32),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Continue reading',
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.w600,
-                            color: cs.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          subtitle,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
+      return Card(
+        elevation: 0,
+        color: tokens.cardContainerColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(tokens.cardBorderRadius),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(tokens.cardBorderRadius),
+          onTap: () => _openContinue(p),
+          child: Padding(
+            padding: EdgeInsets.all(compact ? 12 : 16),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.history_edu_outlined,
+                  color: cs.primary,
+                  size: compact ? 26 : 32,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    subtitle,
+                    maxLines: compact ? 1 : 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.poppins(
+                      fontSize: compact ? 12.5 : 13,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
-                  Icon(Icons.chevron_right, color: cs.outline),
-                ],
-              ),
+                ),
+                Icon(Icons.chevron_right, color: cs.outline),
+              ],
             ),
           ),
         ),
@@ -249,64 +275,49 @@ class _HadithBooksScreenState extends State<HadithBooksScreen> {
     }
 
     final r = BorderRadius.circular(tokens.cardBorderRadius);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: tokens.cardContainerColor,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: tokens.cardContainerColor,
+        borderRadius: r,
+        boxShadow: tokens.cardShadows,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
           borderRadius: r,
-          boxShadow: tokens.cardShadows,
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: r,
-            onTap: go,
-            splashColor: cs.primary.withValues(alpha: 0.12),
-            highlightColor: cs.primary.withValues(alpha: 0.06),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.history_edu_outlined,
-                    color: cs.primary,
-                    size: 28,
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Continue reading',
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15,
-                            letterSpacing: 0.2,
-                            color: tokens.sectionTitle,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          subtitle,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(
-                            fontSize: 12.5,
-                            height: 1.35,
-                            color: tokens.iconSoft,
-                          ),
-                        ),
-                      ],
+          onTap: () => _openContinue(p),
+          splashColor: cs.primary.withValues(alpha: 0.12),
+          highlightColor: cs.primary.withValues(alpha: 0.06),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: compact ? 14 : 18,
+              vertical: compact ? 12 : 16,
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.history_edu_outlined,
+                  color: cs.primary,
+                  size: compact ? 24 : 28,
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    subtitle,
+                    maxLines: compact ? 1 : 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.poppins(
+                      fontSize: compact ? 12 : 12.5,
+                      height: 1.35,
+                      color: tokens.iconSoft,
                     ),
                   ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: tokens.iconSoft,
-                  ),
-                ],
-              ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: tokens.iconSoft,
+                ),
+              ],
             ),
           ),
         ),

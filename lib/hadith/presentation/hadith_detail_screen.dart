@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app5/Global.dart';
 import 'package:app5/hadith/data/hadith_display_prefs.dart';
 import 'package:app5/hadith/data/hadith_repository.dart';
@@ -12,9 +14,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 
 class HadithDetailScreen extends StatefulWidget {
-  const HadithDetailScreen({super.key, required this.item});
+  const HadithDetailScreen({
+    super.key,
+    required this.item,
+    this.initialScrollOffset,
+  });
 
   final HadithItem item;
+  final double? initialScrollOffset;
 
   @override
   State<HadithDetailScreen> createState() => _HadithDetailScreenState();
@@ -22,19 +29,62 @@ class HadithDetailScreen extends StatefulWidget {
 
 class _HadithDetailScreenState extends State<HadithDetailScreen> {
   final _repo = hadithRepository;
+  late final ScrollController _scrollController;
   late HadithItem _item;
   bool _bookmarked = false;
   double _arabicSize = 22;
   double _urduSize = 17;
   bool _enrichingUrdu = false;
+  bool _restoringScroll = false;
+  DateTime? _lastPersistTime;
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
     _item = widget.item;
     HadithDisplayPrefs.instance.ensureLoaded();
+    _scrollController.addListener(_onScroll);
     _syncBookmark();
     _enrichUrduIfNeeded();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _applyInitialScroll());
+  }
+
+  void _applyInitialScroll() {
+    if (!mounted || widget.initialScrollOffset == null) return;
+    _jumpScrollClamped(widget.initialScrollOffset!);
+  }
+
+  void _jumpScrollClamped(double offset) {
+    if (!_scrollController.hasClients) return;
+    final max = _scrollController.position.maxScrollExtent;
+    final y = offset.clamp(0.0, max);
+    _restoringScroll = true;
+    _scrollController.jumpTo(y);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _restoringScroll = false;
+    });
+  }
+
+  void _onScroll() {
+    if (_restoringScroll) return;
+    final now = DateTime.now();
+    if (_lastPersistTime != null &&
+        now.difference(_lastPersistTime!) < const Duration(milliseconds: 400)) {
+      return;
+    }
+    _lastPersistTime = now;
+    unawaited(_persistReadingProgress());
+  }
+
+  Future<void> _persistReadingProgress() async {
+    if (!_scrollController.hasClients) return;
+    await _repo.saveContinueReadingProgress(
+      HadithReadingProgress.fromItem(
+        item: _item,
+        scrollOffset: _scrollController.offset,
+      ),
+    );
   }
 
   Future<void> _enrichUrduIfNeeded() async {
@@ -46,6 +96,28 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
       _item = enriched;
       _enrichingUrdu = false;
     });
+    if (widget.initialScrollOffset != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _jumpScrollClamped(widget.initialScrollOffset!);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    final offset =
+        _scrollController.hasClients ? _scrollController.offset : 0.0;
+    unawaited(
+      _repo.saveContinueReadingProgress(
+        HadithReadingProgress.fromItem(
+          item: _item,
+          scrollOffset: offset,
+        ),
+      ),
+    );
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _syncBookmark() async {
@@ -222,6 +294,7 @@ class _HadithDetailScreenState extends State<HadithDetailScreen> {
         ],
       ),
       body: SingleChildScrollView(
+        controller: _scrollController,
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

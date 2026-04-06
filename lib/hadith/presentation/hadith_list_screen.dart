@@ -4,14 +4,15 @@ import 'package:app5/hadith/data/hadith_repository.dart';
 import 'package:app5/hadith/domain/hadith_models.dart';
 import 'package:app5/hadith/presentation/hadith_detail_screen.dart';
 import 'package:app5/hadith/presentation/hadith_themed_scaffold.dart';
+import 'package:app5/hadith/presentation/hadith_search_language.dart';
 import 'package:app5/hadith/presentation/hadith_ui_tokens.dart';
 import 'package:app5/hadith/presentation/widgets/hadith_card.dart';
 import 'package:app5/hadith/presentation/widgets/hadith_language_settings_sheet.dart';
 import 'package:app5/hadith/presentation/widgets/hadith_state_views.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-enum HadithSearchLanguage { english, urdu, arabic }
 
 class HadithListScreen extends StatefulWidget {
   const HadithListScreen({
@@ -19,11 +20,15 @@ class HadithListScreen extends StatefulWidget {
     required this.bookSlug,
     required this.bookTitle,
     required this.chapter,
+    this.resume,
   });
 
   final String bookSlug;
   final String bookTitle;
   final HadithChapter chapter;
+
+  /// When non-null and matching this chapter, fetches the hadith and opens detail at [HadithReadingProgress.scrollOffset].
+  final HadithReadingProgress? resume;
 
   @override
   State<HadithListScreen> createState() => _HadithListScreenState();
@@ -42,6 +47,7 @@ class _HadithListScreenState extends State<HadithListScreen> {
   static const _perPage = 20;
   String _searchQuery = '';
   HadithSearchLanguage _searchLang = HadithSearchLanguage.english;
+  bool _resumeAttempted = false;
 
   @override
   void initState() {
@@ -105,6 +111,10 @@ class _HadithListScreenState extends State<HadithListScreen> {
         _loading = false;
         _error = null;
       });
+      if (widget.resume != null) {
+        WidgetsBinding.instance
+            .addPostFrameCallback((_) => unawaited(_tryOpenResume()));
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -148,6 +158,39 @@ class _HadithListScreenState extends State<HadithListScreen> {
     _load(reset: true);
   }
 
+  Future<void> _tryOpenResume() async {
+    if (!mounted || _resumeAttempted) return;
+    final r = widget.resume;
+    if (r == null) return;
+    if (r.bookSlug != widget.bookSlug ||
+        r.chapterNumber != widget.chapter.chapterNumber) {
+      return;
+    }
+    _resumeAttempted = true;
+    final item = await _repo.fetchHadithForReadingProgress(r);
+    if (!mounted) return;
+    if (item == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Could not resume. Content may have changed.',
+            style: GoogleFonts.poppins(),
+          ),
+        ),
+      );
+      return;
+    }
+    final offset = r.scrollOffset;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => HadithDetailScreen(
+          item: item,
+          initialScrollOffset: offset.isFinite ? offset : 0,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -182,8 +225,8 @@ class _HadithListScreenState extends State<HadithListScreen> {
                 SegmentedButton<HadithSearchLanguage>(
                   style: ButtonStyle(
                     foregroundColor:
-                        MaterialStateProperty.resolveWith<Color>((states) {
-                      if (states.contains(MaterialState.selected)) {
+                        WidgetStateProperty.resolveWith<Color>((states) {
+                      if (states.contains(WidgetState.selected)) {
                         return Colors.white; // selected tab text
                       }
                       return Colors
@@ -289,6 +332,8 @@ class _HadithListScreenState extends State<HadithListScreen> {
                                   return HadithCard(
                                     item: item,
                                     visibility: vis,
+                                    highlightQuery: _searchQuery,
+                                    highlightLanguage: _searchLang,
                                     onTap: () {
                                       Navigator.of(context).push(
                                         MaterialPageRoute<void>(
