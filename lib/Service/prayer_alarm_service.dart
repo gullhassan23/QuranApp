@@ -37,7 +37,7 @@ const String payloadTypePrayerAlarm = 'prayer_alarm';
 const Duration snoozeDuration = Duration(minutes: 5);
 
 /// Method channel for Android exact-alarm permission (Android 12+).
-const MethodChannel _exactAlarmChannel = MethodChannel('com.example.app5/prayer_alarm');
+const MethodChannel _exactAlarmChannel = MethodChannel('com.PixelStudio.alquran/prayer_alarm');
 
 class PrayerAlarmService {
   PrayerAlarmService(this._notificationsPlugin);

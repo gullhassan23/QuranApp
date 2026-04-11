@@ -136,7 +136,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> _checkAlarmLaunchPayload() async {
     try {
       await Future.delayed(const Duration(milliseconds: 500));
-      const channel = MethodChannel('com.example.app5/prayer_alarm');
+      const channel = MethodChannel('com.PixelStudio.alquran/prayer_alarm');
       final payload = await channel
           .invokeMethod<Map<dynamic, dynamic>>('getAlarmLaunchPayload');
       if (payload == null) return;
@@ -154,6 +154,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Al Quran',
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

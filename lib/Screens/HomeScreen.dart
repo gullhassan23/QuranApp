@@ -3,6 +3,7 @@ import 'package:app5/Widget/Hijri2W.dart';
 import 'package:app5/Widget/HijriW.dart';
 import 'package:app5/constants/constants.dart';
 import 'package:app5/hadith/presentation/hadith_books_screen.dart';
+import 'package:app5/legal/legal_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -124,6 +125,59 @@ class _HomeState extends State<Home> {
                     // ),
                     //  next widget
                     Hijri2Widget(),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // TextButton(
+                          //   onPressed: () => openTermsAndConditions(context),
+                          //   style: TextButton.styleFrom(
+                          //     foregroundColor: textprimary,
+                          //     padding: const EdgeInsets.symmetric(
+                          //       horizontal: 12,
+                          //       vertical: 8,
+                          //     ),
+                          //   ),
+                          //   child: Text(
+                          //     'Terms & Conditions',
+                          //     style: GoogleFonts.poppins(
+                          //       fontSize: 13,
+                          //       fontWeight: FontWeight.w600,
+                          //       decoration: TextDecoration.underline,
+                          //       decorationColor: textprimary,
+                          //     ),
+                          //   ),
+                          // ),
+                          // Text(
+                          //   '·',
+                          //   style: GoogleFonts.poppins(
+                          //     fontSize: 13,
+                          //     color: dark.withValues(alpha: 0.45),
+                          //   ),
+                          // ),
+                          TextButton(
+                            onPressed: () => openPrivacyPolicy(context),
+                            style: TextButton.styleFrom(
+                              foregroundColor: textprimary,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                            ),
+                            child: Text(
+                              'Privacy Policy',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                decoration: TextDecoration.underline,
+                                decorationColor: textprimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     // Padding(
                     //   padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
                     //   child: Material(

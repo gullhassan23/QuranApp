@@ -1,4 +1,4 @@
-package com.example.app5
+package com.PixelStudio.alquran
 
 import android.app.AlarmManager
 import android.app.NotificationChannel
@@ -97,7 +97,7 @@ class AlarmReceiver : BroadcastReceiver() {
     }
 
     companion object {
-        const val ACTION_PRAYER_ALARM = "com.example.app5.PRAYER_ALARM"
+        const val ACTION_PRAYER_ALARM = "com.PixelStudio.alquran.PRAYER_ALARM"
         const val CHANNEL_ID = "prayer_alarm_channel_v2"
         const val NOTIFICATION_ID = 100
 

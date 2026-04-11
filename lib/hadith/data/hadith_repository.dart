@@ -242,7 +242,8 @@ class HadithRepository {
     if (savedDate == today && savedJson != null && savedJson.isNotEmpty) {
       try {
         final map = jsonDecode(savedJson) as Map<String, dynamic>;
-        return _itemFromHotdCache(map);
+        final cached = _itemFromHotdCache(map);
+        if (cached != null) return cached;
       } catch (_) {}
     }
     final item = await _computeHadithOfTheDay();
@@ -298,32 +299,38 @@ class HadithRepository {
 
   Future<HadithItem?> _computeHadithOfTheDay() async {
     if (!HadithApiConfig.hasApiKey) return null;
-    final seed = _todayString().hashCode.abs();
     final books = kHadithBookCatalog;
     if (books.isEmpty) return null;
-    final book = books[seed % books.length];
-    List<HadithChapter> chapters;
-    try {
-      chapters = await getChapters(book.slug);
-    } catch (_) {
-      return null;
+    final base = _todayString().hashCode.abs();
+    // Some catalog books/chapters return 404 or empty hadiths from the API;
+    // try several derived seeds so a day rarely ends up with no hadith.
+    const maxAttempts = 32;
+    for (var attempt = 0; attempt < maxAttempts; attempt++) {
+      final seed = base + attempt * 9973;
+      final book = books[seed % books.length];
+      List<HadithChapter> chapters;
+      try {
+        chapters = await getChapters(book.slug);
+      } catch (_) {
+        continue;
+      }
+      if (chapters.isEmpty) continue;
+      final ch = chapters[(seed >> 3) % chapters.length];
+      try {
+        final page = await getHadithPage(
+          bookSlug: book.slug,
+          chapterNumber: ch.chapterNumber,
+          page: 1,
+          paginate: 25,
+          bypassCache: true,
+        );
+        if (page.items.isEmpty) continue;
+        return page.items[(seed >> 7) % page.items.length];
+      } catch (_) {
+        continue;
+      }
     }
-    if (chapters.isEmpty) return null;
-    final ch = chapters[(seed >> 3) % chapters.length];
-    HadithPage page;
-    try {
-      page = await getHadithPage(
-        bookSlug: book.slug,
-        chapterNumber: ch.chapterNumber,
-        page: 1,
-        paginate: 25,
-        bypassCache: true,
-      );
-    } catch (_) {
-      return null;
-    }
-    if (page.items.isEmpty) return null;
-    return page.items[(seed >> 7) % page.items.length];
+    return null;
   }
 }
 

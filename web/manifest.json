@@ -1,6 +1,6 @@
 {
-    "name": "app5",
-    "short_name": "app5",
+    "name": "Al Quran",
+    "short_name": "Al Quran",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
