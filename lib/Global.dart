@@ -8,7 +8,7 @@ Color primary = const Color(0xFFA44AFF);
 Color gray = const Color(0xFF121931);
 Color dark = const Color(0xFF5A5A5A);
 Color containercolor = const Color(0xFFD2B48C);
-Color cardcolor = Color(0xffF6DED8);
+Color cardcolor = Color(0xffF6DED8);   
 Color textprimary = Color(0xFF6E4B3A);
 Color accentgreen = Color(0xff4D8B5E);
 

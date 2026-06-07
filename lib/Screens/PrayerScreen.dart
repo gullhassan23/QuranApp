@@ -33,7 +33,9 @@ class _PrayerScreenState extends State<PrayerScreen> {
 
   Future<void> _loadEnabledPrayer() async {
     final enabled = await PrayerAlarmService.getEnabledPrayer();
-    if (mounted) setState(() => _selectedAlarmPrayer = enabled);
+    if (mounted) {
+      setState(() => _selectedAlarmPrayer = enabled);
+    }
   }
 
   Future<void> _getLoc() async {
@@ -67,7 +69,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
     setState(() => _selectedAlarmPrayer = newSelection);
     if (newSelection != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Your alarm is set on $time')),
+        SnackBar(content: Text('Alarm set for $newSelection at $time')),
       );
       final canExact = await PrayerAlarmService.canScheduleExactAlarms();
       if (!canExact && mounted) {
@@ -97,27 +99,6 @@ class _PrayerScreenState extends State<PrayerScreen> {
           ),
         );
       }
-    }
-  }
-
-  Future<void> _scheduleTestAlarm(Duration fromNow) async {
-    final ok = await PrayerAlarmService.scheduleTestAlarm(fromNow);
-    if (!mounted) return;
-    final minutes = fromNow.inMinutes;
-    if (ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            minutes <= 1
-                ? 'Test alarm in 1 minute'
-                : 'Test alarm in $minutes minutes',
-          ),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not set test alarm.')),
-      );
     }
   }
 
@@ -205,34 +186,6 @@ class _PrayerScreenState extends State<PrayerScreen> {
                       selectedAlarmPrayer: _selectedAlarmPrayer,
                       onAlarmToggle: _onAlarmToggle,
                     ),
-                    const Divider(color: Colors.black, thickness: 1),
-                    // Padding(
-                    //   padding: const EdgeInsets.symmetric(vertical: 12.0),
-                    //   child: Text(
-                    //     'Test alarm',
-                    //     style: GoogleFonts.poppins(
-                    //       fontSize: 14,
-                    //       color: dark,
-                    //       fontWeight: FontWeight.w500,
-                    //     ),
-                    //   ),
-                    // ),
-                    // Row(
-                    //   mainAxisAlignment: MainAxisAlignment.center,
-                    //   children: [
-                    //     _TestAlarmButton(
-                    //       label: 'Ring in 1 min',
-                    //       onPressed: () =>
-                    //           _scheduleTestAlarm(const Duration(minutes: 1)),
-                    //     ),
-                    //     const SizedBox(width: 12),
-                    //     _TestAlarmButton(
-                    //       label: 'Ring in 2 min',
-                    //       onPressed: () =>
-                    //           _scheduleTestAlarm(const Duration(minutes: 2)),
-                    //     ),
-                    //   ],
-                    // ),
                   ],
                 ),
               ),

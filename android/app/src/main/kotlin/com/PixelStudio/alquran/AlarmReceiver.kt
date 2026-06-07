@@ -1,4 +1,4 @@
-package com.PixelStudio.alquran
+package com.pixorastudio.quran
 
 import android.app.AlarmManager
 import android.app.NotificationChannel
@@ -54,9 +54,9 @@ class AlarmReceiver : BroadcastReceiver() {
         manager.createNotificationChannel(channel)
     }
 
-    /** Custom alarm tune from res/raw/alarm.wav; falls back to system default if missing. */
+    /** Custom azan tune from res/raw/azan.mp3; falls back to system default if missing. */
     private fun getAlarmSoundUri(context: Context): Uri {
-        return Uri.parse("android.resource://${context.packageName}/raw/alarm")
+        return Uri.parse("android.resource://${context.packageName}/raw/azan")
     }
 
     private fun showAlarmNotification(context: Context, prayerName: String, timeFormatted: String, notificationId: Int = NOTIFICATION_ID) {
@@ -97,8 +97,8 @@ class AlarmReceiver : BroadcastReceiver() {
     }
 
     companion object {
-        const val ACTION_PRAYER_ALARM = "com.PixelStudio.alquran.PRAYER_ALARM"
-        const val CHANNEL_ID = "prayer_alarm_channel_v2"
+        const val ACTION_PRAYER_ALARM = "com.pixorastudio.quran.PRAYER_ALARM"
+        const val CHANNEL_ID = "prayer_alarm_channel_v3"
         const val NOTIFICATION_ID = 100
 
         const val EXTRA_PRAYER_NAME = "prayer_name"

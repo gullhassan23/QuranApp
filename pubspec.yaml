@@ -28,6 +28,7 @@ dependencies:
   # Storage & utilities
   shared_preferences: ^2.0.18
   share_plus: ^10.1.4
+  url_launcher: ^6.3.1
   hijri: ^3.0.0
   location: ^8.0.1
 

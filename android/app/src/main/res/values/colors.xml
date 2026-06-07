@@ -2,4 +2,5 @@
 <resources>
     <!-- Native splash + Android 12+ splash screen background -->
     <color name="splash_background">#FF000000</color>
+	<color name="ic_launcher_background">#D9C9A8</color>
 </resources>

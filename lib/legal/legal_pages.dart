@@ -1,6 +1,7 @@
 import 'package:app5/Global.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void openTermsAndConditions(BuildContext context) {
   Navigator.of(context).push<void>(
@@ -13,15 +14,18 @@ void openTermsAndConditions(BuildContext context) {
   );
 }
 
-void openPrivacyPolicy(BuildContext context) {
-  Navigator.of(context).push<void>(
-    MaterialPageRoute<void>(
-      builder: (_) => const _LegalScrollScreen(
-        title: 'Privacy Policy',
-        body: _privacyPlaceholder,
+Future<void> openPrivacyPolicy(BuildContext context) async {
+  const policyUrl = 'https://gullhassan23.github.io/Quran_privacy/';
+  final uri = Uri.parse(policyUrl);
+
+  final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+  if (!opened && context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Unable to open Privacy Policy link.'),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _LegalScrollScreen extends StatelessWidget {
@@ -78,47 +82,3 @@ By using this application you agree to use it respectfully and in line with appl
 If you have questions, add your support contact here.
 ''';
 
-const String _privacyPlaceholder = '''
-
-Privacy Policy for Quran App
-
-Information We Collect
-
-We aim to keep your experience private and secure. Our app may collect:
-
-No Personal Information (Default): We do not collect personally identifiable information such as your name, email, or phone number.
-Usage Data (Optional): We may collect anonymous usage data (such as app usage statistics) to improve the app experience.
-Device Information: Basic device information (such as device type, OS version) may be collected automatically.
-
-How We Use Information
-
-Any collected information is used to:
-
-Improve app performance and user experience
-Fix bugs and technical issues
-Understand general usage trends
-
-Third-Party Services
-
-Our app may use third-party services that may collect information, such as:
-
-Analytics tools (e.g., Google Analytics)
-Advertising services (if ads are enabled)
-
-These services have their own Privacy Policies.
-
-Data Security
-
-We value your trust and strive to use commercially acceptable means of protecting your information. However, no method of transmission over the internet is 100% secure.
-
-Children’s Privacy
-
-Our app is suitable for all ages. We do not knowingly collect personal information from children.
-Changes to This Policy
-
-We may update our Privacy Policy from time to time. Any changes will be posted on this page.
-
----
-
-Note: This app is designed to provide Quranic content for educational and spiritual purposes only.
-''';

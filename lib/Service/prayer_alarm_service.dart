@@ -15,6 +15,8 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 const String _keyEnabledPrayer = 'prayer_alarm_enabled';
 const String _keyAlarmLat = 'prayer_alarm_lat';
 const String _keyAlarmLng = 'prayer_alarm_lng';
+const String _keyAlarmOffsetMinutes = 'prayer_alarm_offset_minutes';
+const String _keyAlarmOffsetBefore = 'prayer_alarm_offset_before';
 
 /// Fixed notification IDs to avoid stacking.
 const int prayerAlarmNotificationId = 100;
@@ -37,7 +39,7 @@ const String payloadTypePrayerAlarm = 'prayer_alarm';
 const Duration snoozeDuration = Duration(minutes: 5);
 
 /// Method channel for Android exact-alarm permission (Android 12+).
-const MethodChannel _exactAlarmChannel = MethodChannel('com.PixelStudio.alquran/prayer_alarm');
+const MethodChannel _exactAlarmChannel = MethodChannel('com.pixorastudio.quran/prayer_alarm');
 
 class PrayerAlarmService {
   PrayerAlarmService(this._notificationsPlugin);
@@ -83,6 +85,37 @@ class PrayerAlarmService {
   static Future<String?> getEnabledPrayer() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_keyEnabledPrayer);
+  }
+
+  /// Minutes before/after prayer time (0 = exact prayer time).
+  static Future<int> getAlarmOffsetMinutes() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_keyAlarmOffsetMinutes) ?? 0;
+  }
+
+  /// true = before prayer, false = after prayer.
+  static Future<bool> getAlarmOffsetBefore() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyAlarmOffsetBefore) ?? true;
+  }
+
+  static Future<int> _effectiveOffsetMinutes() async {
+    final minutes = await getAlarmOffsetMinutes();
+    if (minutes == 0) return 0;
+    final before = await getAlarmOffsetBefore();
+    return before ? -minutes : minutes;
+  }
+
+  /// Save offset and reschedule if a prayer alarm is already enabled.
+  Future<void> setAlarmOffset({required int minutes, required bool before}) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_keyAlarmOffsetMinutes, minutes.clamp(0, 120));
+    await prefs.setBool(_keyAlarmOffsetBefore, before);
+    final enabled = await getEnabledPrayer();
+    if (enabled == null || enabled.isEmpty) return;
+    await _cancelAll();
+    await _cancelNativeAlarm();
+    await _scheduleNext(enabled);
   }
 
   /// On Android 12+, returns whether the app can schedule exact alarms. On other platforms, returns true.
@@ -167,9 +200,11 @@ class PrayerAlarmService {
     final params = CalculationMethod.karachi.getParameters();
     params.madhab = Madhab.hanafi;
 
+    final offsetMinutes = await _effectiveOffsetMinutes();
     final now = DateTime.now();
     PrayerTimes prayerTimes = PrayerTimes.today(coordinates, params);
-    DateTime scheduledTime = _getPrayerDateTime(prayerTimes, prayerName);
+    DateTime scheduledTime = _getPrayerDateTime(prayerTimes, prayerName)
+        .add(Duration(minutes: offsetMinutes));
 
     if (scheduledTime.isBefore(now) || scheduledTime.isAtSameMomentAs(now)) {
       final tomorrow = now.add(const Duration(days: 1));
@@ -178,7 +213,8 @@ class PrayerAlarmService {
         DateComponents.from(tomorrow),
         params,
       );
-      scheduledTime = _getPrayerDateTime(prayerTimes, prayerName);
+      scheduledTime = _getPrayerDateTime(prayerTimes, prayerName)
+          .add(Duration(minutes: offsetMinutes));
     }
 
     final timeFormatted = DateFormat.jm().format(scheduledTime);

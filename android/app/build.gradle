@@ -29,7 +29,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.PixelStudio.alquran"
+    namespace "com.pixorastudio.quran"
     compileSdkVersion 36
     // ndkVersion flutter.ndkVersion
 
@@ -48,7 +48,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.PixelStudio.alquran"
+        applicationId "com.pixorastudio.quran"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()
