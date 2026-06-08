@@ -1,6 +1,5 @@
 import 'package:adhan/adhan.dart';
 import 'package:app5/Global.dart';
-import 'package:app5/constants/constants.dart';
 import 'package:app5/Service/notification_provider.dart';
 import 'package:app5/Service/prayer_alarm_service.dart';
 import 'package:flutter/foundation.dart';
@@ -21,6 +20,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
   double? _latitude;
   double? _longitude;
   String? _selectedAlarmPrayer;
+  late final Future<void> _locationFuture;
 
   static const double _fallbackLat = 30.8138;
   static const double _fallbackLng = 73.4534;
@@ -28,6 +28,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
   @override
   void initState() {
     super.initState();
+    _locationFuture = _initLocation();
     _loadEnabledPrayer();
   }
 
@@ -38,17 +39,32 @@ class _PrayerScreenState extends State<PrayerScreen> {
     }
   }
 
-  Future<void> _getLoc() async {
-    bool serviceEnabled = await _location.serviceEnabled();
+  Future<void> _initLocation() async {
+    if (await PrayerAlarmService.hasSavedCoordinates()) {
+      final coords = await PrayerAlarmService.getCoordinates();
+      _latitude = coords.latitude;
+      _longitude = coords.longitude;
+      return;
+    }
+    await _fetchLocation();
+  }
+
+  Future<void> _fetchLocation() async {
+    var permission = await _location.hasPermission();
+    if (permission == PermissionStatus.denied) {
+      permission = await _location.requestPermission();
+    }
+    if (permission != PermissionStatus.granted &&
+        permission != PermissionStatus.grantedLimited) {
+      return;
+    }
+
+    var serviceEnabled = await _location.serviceEnabled();
     if (!serviceEnabled) {
       serviceEnabled = await _location.requestService();
       if (!serviceEnabled) return;
     }
-    var permissionGranted = await _location.hasPermission();
-    if (permissionGranted == PermissionStatus.denied) {
-      permissionGranted = await _location.requestPermission();
-      if (permissionGranted != PermissionStatus.granted) return;
-    }
+
     final data = await _location.getLocation();
     if (data.latitude != null && data.longitude != null) {
       _latitude = data.latitude!;
@@ -122,7 +138,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
         ),
         backgroundColor: backgroundColor,
         body: FutureBuilder<void>(
-          future: _getLoc(),
+          future: _locationFuture,
           builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(

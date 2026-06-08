@@ -65,6 +65,11 @@ class PrayerAlarmService {
     _timezoneInitialized = true;
   }
 
+  static Future<bool> hasSavedCoordinates() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey(_keyAlarmLat) && prefs.containsKey(_keyAlarmLng);
+  }
+
   /// Save last known coordinates (call from PrayerScreen when location is obtained).
   static Future<void> saveCoordinates(double lat, double lng) async {
     final prefs = await SharedPreferences.getInstance();

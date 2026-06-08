@@ -2,7 +2,6 @@ import 'package:app5/Global.dart';
 import 'package:app5/Widget/Hijri2W.dart';
 import 'package:app5/Widget/HijriW.dart';
 import 'package:app5/constants/constants.dart';
-import 'package:app5/hadith/presentation/hadith_books_screen.dart';
 import 'package:app5/legal/legal_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
