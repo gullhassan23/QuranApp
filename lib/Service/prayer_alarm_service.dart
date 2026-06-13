@@ -23,7 +23,14 @@ const int prayerAlarmNotificationId = 100;
 const int snoozeNotificationId = 101;
 
 /// Prayer names that can be enabled (matches UI; "Zuhr" not "Dhuhr" for display). Sunrise added for testing.
-const List<String> prayerAlarmOptions = ['Fajr', 'Sunrise', 'Zuhr', 'Asr', 'Maghrib', 'Isha'];
+const List<String> prayerAlarmOptions = [
+  'Fajr',
+  'Sunrise',
+  'Zuhr',
+  'Asr',
+  'Maghrib',
+  'Isha'
+];
 
 /// Default coordinates (fallback when location not available).
 const double _defaultLat = 30.8138;
@@ -39,13 +46,15 @@ const String payloadTypePrayerAlarm = 'prayer_alarm';
 const Duration snoozeDuration = Duration(minutes: 5);
 
 /// Method channel for Android exact-alarm permission (Android 12+).
-const MethodChannel _exactAlarmChannel = MethodChannel('com.pixorastudio.quran/prayer_alarm');
+const MethodChannel _exactAlarmChannel =
+    MethodChannel('com.pixorastudio.quranpak/prayer_alarm');
 
 class PrayerAlarmService {
   PrayerAlarmService(this._notificationsPlugin);
 
   final FlutterLocalNotificationsPlugin _notificationsPlugin;
   static bool _timezoneInitialized = false;
+
   /// When true, named timezone failed; we build TZDateTime from device local instant instead.
   static bool _timezoneFallback = false;
 
@@ -112,7 +121,8 @@ class PrayerAlarmService {
   }
 
   /// Save offset and reschedule if a prayer alarm is already enabled.
-  Future<void> setAlarmOffset({required int minutes, required bool before}) async {
+  Future<void> setAlarmOffset(
+      {required int minutes, required bool before}) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_keyAlarmOffsetMinutes, minutes.clamp(0, 120));
     await prefs.setBool(_keyAlarmOffsetBefore, before);
@@ -127,7 +137,8 @@ class PrayerAlarmService {
   static Future<bool> canScheduleExactAlarms() async {
     if (!Platform.isAndroid) return true;
     try {
-      final r = await _exactAlarmChannel.invokeMethod<bool>('canScheduleExactAlarms');
+      final r =
+          await _exactAlarmChannel.invokeMethod<bool>('canScheduleExactAlarms');
       return r ?? true;
     } catch (_) {
       return true;
@@ -228,7 +239,8 @@ class PrayerAlarmService {
     // On Android: use native AlarmManager so alarm rings at exact time (even when app is closed).
     if (Platform.isAndroid) {
       try {
-        final scheduled = await _exactAlarmChannel.invokeMethod<bool>('schedulePrayerAlarm', {
+        final scheduled =
+            await _exactAlarmChannel.invokeMethod<bool>('schedulePrayerAlarm', {
           'timestampMillis': triggerAtMillis,
           'prayerName': prayerName,
           'timeFormatted': timeFormatted,
@@ -312,7 +324,8 @@ class PrayerAlarmService {
     final tz.TZDateTime when;
     if (_timezoneFallback) {
       final nowMs = DateTime.now().millisecondsSinceEpoch;
-      when = tz.TZDateTime.fromMillisecondsSinceEpoch(tz.UTC, nowMs).add(snoozeDuration);
+      when = tz.TZDateTime.fromMillisecondsSinceEpoch(tz.UTC, nowMs)
+          .add(snoozeDuration);
     } else {
       when = tz.TZDateTime.now(tz.local).add(snoozeDuration);
     }

@@ -1,4 +1,4 @@
-package com.pixorastudio.quran
+package com.pixorastudio.quranpak
 
 import android.app.AlarmManager
 import android.app.NotificationChannel
@@ -97,7 +97,7 @@ class AlarmReceiver : BroadcastReceiver() {
     }
 
     companion object {
-        const val ACTION_PRAYER_ALARM = "com.pixorastudio.quran.PRAYER_ALARM"
+        const val ACTION_PRAYER_ALARM = "com.pixorastudio.quranpak.PRAYER_ALARM"
         const val CHANNEL_ID = "prayer_alarm_channel_v3"
         const val NOTIFICATION_ID = 100
 

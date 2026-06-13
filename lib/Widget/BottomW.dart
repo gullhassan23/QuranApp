@@ -71,7 +71,7 @@ class _BottomWState extends State<BottomW> {
             ),
             BottomNavigationBarItem(
               icon: Image.asset(
-                "assets/images/quran.png",
+                "assets/images/Quran.png",
                 height: 30,
                 width: 50,
               ),

@@ -136,7 +136,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> _checkAlarmLaunchPayload() async {
     try {
       await Future.delayed(const Duration(milliseconds: 500));
-      const channel = MethodChannel('com.pixorastudio.quran/prayer_alarm');
+      const channel = MethodChannel('com.pixorastudio.quranpak/prayer_alarm');
       final payload = await channel
           .invokeMethod<Map<dynamic, dynamic>>('getAlarmLaunchPayload');
       if (payload == null) return;

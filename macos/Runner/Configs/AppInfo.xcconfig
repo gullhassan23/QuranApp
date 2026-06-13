@@ -8,7 +8,7 @@
 PRODUCT_NAME = "Al Quran"
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.pixorastudio.quran
+PRODUCT_BUNDLE_IDENTIFIER = com.pixorastudio.quranpak
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2023 PixelStudio. All rights reserved.
